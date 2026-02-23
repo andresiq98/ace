@@ -1,0 +1,131 @@
+"use client";
+
+import { MOCK_LEADERBOARD, CURRENT_USER, MOCK_GROUP } from "@/lib/data";
+
+export default function RankingPage() {
+    const getBadgeEmoji = (pos: number) => {
+        if (pos === 1) return "🏆";
+        if (pos === MOCK_LEADERBOARD.length) return "🏮";
+        return null;
+    };
+
+    const getPosColor = (pos: number) => {
+        if (pos === 1) return "text-ace-gold [text-shadow:0_0_12px_rgba(255,215,0,0.3)]";
+        if (pos === 2) return "text-[#C0C0C0]";
+        if (pos === 3) return "text-[#CD7F32]";
+        if (pos === MOCK_LEADERBOARD.length) return "text-destructive";
+        return "text-ace-mid";
+    };
+
+    return (
+        <div>
+            {/* Hero */}
+            <div className="bg-gradient-to-b from-[#0C1400] to-background px-5 py-5 relative overflow-hidden">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-[radial-gradient(ellipse,rgba(204,255,0,0.05)_0%,transparent_70%)] pointer-events-none" />
+
+                {/* Group info */}
+                <div className="flex items-center gap-2.5 mb-4">
+                    <div className="w-[7px] h-[7px] bg-neon rounded-full shadow-[0_0_8px_rgba(204,255,0,0.25)] animate-blink" />
+                    <span className="text-[13px] font-semibold text-ace-mid">{MOCK_GROUP.name}</span>
+                    <span className="ml-auto bg-neon/[0.06] border border-neon/15 rounded-lg px-3 py-[5px] text-[11px] font-bold text-neon font-display tracking-[1px]">
+                        4d 12h 33m
+                    </span>
+                </div>
+
+                {/* My Position Card */}
+                {(() => {
+                    const myIdx = MOCK_LEADERBOARD.findIndex(e => e.userId === CURRENT_USER.id);
+                    const myEntry = MOCK_LEADERBOARD[myIdx];
+                    return (
+                        <div className="bg-ace-surface border border-neon/20 rounded-2xl p-4 px-[18px] flex items-center gap-3.5 relative overflow-hidden">
+                            <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-neon shadow-[0_0_12px_rgba(204,255,0,0.25)]" />
+                            <div className="absolute inset-0 bg-gradient-to-br from-neon/[0.03] to-transparent pointer-events-none" />
+                            <div className="font-display font-black text-[42px] tracking-[-3px] leading-none text-neon pl-3 neon-text-glow">
+                                {myIdx + 1}°
+                            </div>
+                            <div>
+                                <div className="font-bold text-[15px]">{myEntry.player.displayName}</div>
+                                <div className="text-[11px] text-ace-muted mt-[3px]">
+                                    {myEntry.gamesPlayed} jogos · {myEntry.wins}V {myEntry.losses}D · você
+                                </div>
+                            </div>
+                            <div className="ml-auto text-right">
+                                <div className="font-display text-xl font-black text-neon tracking-[-1px]">{myEntry.points}</div>
+                                <span className="text-[10px] font-semibold text-ace-muted">pts</span>
+                            </div>
+                        </div>
+                    );
+                })()}
+            </div>
+
+            {/* Ranking List */}
+            <div className="px-5 pt-4">
+                <h3 className="font-display font-extrabold text-[10px] tracking-[5px] uppercase text-ace-muted mb-3.5">
+                    Ranking Semanal
+                </h3>
+
+                {MOCK_LEADERBOARD.map((entry, i) => {
+                    const pos = i + 1;
+                    const isMe = entry.userId === CURRENT_USER.id;
+                    const badge = getBadgeEmoji(pos);
+
+                    return (
+                        <div
+                            key={entry.userId}
+                            className={`flex items-center gap-3 py-3.5 border-b border-white/[0.04] transition-all duration-200 animate-card-in ${isMe ? "bg-neon/[0.03] rounded-xl px-3 -mx-3 border-b-0 border border-neon/[0.08]" : ""
+                                }`}
+                            style={{ animationDelay: `${i * 0.05}s` }}
+                        >
+                            {/* Position */}
+                            <div className={`font-display font-black text-xl w-7 text-center shrink-0 ${getPosColor(pos)}`}>
+                                {pos}
+                            </div>
+
+                            {/* Avatar */}
+                            <div
+                                className="w-11 h-11 rounded-full flex items-center justify-center font-display font-black text-[13px] shrink-0 relative"
+                                style={{ background: entry.player.gradient, color: entry.player.textColor }}
+                            >
+                                {entry.player.initials}
+                                {badge && (
+                                    <div className="absolute -bottom-1 -right-1 text-xs w-5 h-5 bg-background rounded-full flex items-center justify-center border border-ace-border">
+                                        {badge}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Info */}
+                            <div className="flex-1 min-w-0">
+                                <div className="font-bold text-sm">
+                                    {entry.player.displayName} {isMe && "← você"}
+                                </div>
+                                <div className={`text-[10px] mt-[3px] ${entry.badge === "champion" ? "text-neon font-bold" :
+                                        entry.badge === "lantern" ? "text-destructive font-bold" :
+                                            "text-ace-muted"
+                                    }`}>
+                                    {entry.badge === "champion" && "🏆 CAMPEÃO DA SEMANA"}
+                                    {entry.badge === "lantern" && "🏮 GUARDIÃO DA LANTERNA"}
+                                    {!entry.badge && `${entry.gamesPlayed} jogo${entry.gamesPlayed > 1 ? "s" : ""}`}
+                                </div>
+                            </div>
+
+                            {/* Points */}
+                            <div className={`font-display font-black text-[17px] tracking-[-1px] ${entry.badge === "lantern" ? "text-destructive" : "text-neon"
+                                }`}>
+                                {entry.points}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+
+            {/* Invite Code */}
+            <div className="mx-5 mt-5 mb-6 bg-ace-surface border border-ace-border rounded-2xl p-4 px-[18px] flex items-center justify-between">
+                <div className="text-xs text-ace-muted">📨 Código do grupo</div>
+                <div className="font-display font-black text-lg tracking-[5px] text-neon neon-text-glow">
+                    {MOCK_GROUP.inviteCode}
+                </div>
+            </div>
+        </div>
+    );
+}
