@@ -3045,36 +3045,7 @@
         </div>
       </div>
       <div class="rlist">
-        <div class="rltitle">Ranking Semanal</div>
-        <div class="rrow">
-          <div class="rpos g">1</div>
-          <div class="rav" style="background:linear-gradient(135deg,#FFD700,#FF8F00);color:#000;">RM<div class="ravb">🏆
-            </div>
-          </div>
-          <div class="rinfo">
-            <div class="rname">Rafael Moura</div>
-            <div class="rsub n">🏆 CAMPEÃO DA SEMANA</div>
-          </div>
-          <div class="rpts">58</div>
-        </div>
-        <div class="rrow me">
-          <div class="rpos s">2</div>
-          <div class="rav" style="background:var(--neon);color:#000;">CA</div>
-          <div class="rinfo">
-            <div class="rname">Carlos Augusto ← você</div>
-            <div class="rsub">5 jogos · 3V 2D</div>
-          </div>
-          <div class="rpts">47</div>
-        </div>
-        <div class="rrow">
-          <div class="rpos b">3</div>
-          <div class="rav" style="background:#2979FF;color:#fff;">LP</div>
-          <div class="rinfo">
-            <div class="rname">Lucas Pinheiro</div>
-            <div class="rsub">2 jogos</div>
-          </div>
-          <div class="rpts">41</div>
-        </div>
+        <div class="rltitle">Ranking Completo</div>
         <div class="rrow">
           <div class="rpos" style="color:var(--mid);">4</div>
           <div class="rav" style="background:#FF6E40;color:#fff;">MF</div>
@@ -3122,13 +3093,45 @@
         </div>
       </div>
       <div class="ptitle">BORA<br><span class="n">PRO PLAY?</span></div>
-      <div class="drillcard" style="border-color:var(--border);">
+      <div class="drillcard" style="border-color:var(--border);cursor:pointer;" onclick="toggleAgendar()">
         <div class="drillico">📅</div>
         <div class="drillinfo">
           <div class="drillname">Agendar Jogo</div>
           <div class="drilldesc">Marque data/hora e avise pelo WhatsApp</div>
         </div>
-        <div style="color:var(--muted);">▼</div>
+        <div style="color:var(--muted);transition:transform .3s;" id="agendar-arrow">▼</div>
+      </div>
+      <!-- Agendar expandido -->
+      <div id="agendar-panel"
+        style="display:none;margin:0 20px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;animation:cardIn .3s var(--ease-out-expo) both;">
+        <div class="seglabel" style="margin-bottom:10px;">📅 Escolha o dia</div>
+        <div id="cal-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div style="cursor:pointer;font-size:18px;color:var(--muted);padding:4px 8px;" onclick="calNav(-1)">←</div>
+          <div id="cal-month"
+            style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;text-transform:uppercase;letter-spacing:1px;">
+          </div>
+          <div style="cursor:pointer;font-size:18px;color:var(--muted);padding:4px 8px;" onclick="calNav(1)">→</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px;">
+          <div style="font-size:9px;text-align:center;color:var(--muted);font-weight:700;">DOM</div>
+          <div style="font-size:9px;text-align:center;color:var(--muted);font-weight:700;">SEG</div>
+          <div style="font-size:9px;text-align:center;color:var(--muted);font-weight:700;">TER</div>
+          <div style="font-size:9px;text-align:center;color:var(--muted);font-weight:700;">QUA</div>
+          <div style="font-size:9px;text-align:center;color:var(--muted);font-weight:700;">QUI</div>
+          <div style="font-size:9px;text-align:center;color:var(--muted);font-weight:700;">SEX</div>
+          <div style="font-size:9px;text-align:center;color:var(--muted);font-weight:700;">SAB</div>
+        </div>
+        <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:16px;"></div>
+        <div class="seglabel" style="margin-bottom:10px;">⏰ Horário</div>
+        <div id="time-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:16px;"></div>
+        <div id="agendar-summary"
+          style="display:none;background:rgba(204,255,0,.04);border:1px solid rgba(204,255,0,.15);border-radius:12px;padding:12px 16px;margin-bottom:16px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Resumo do agendamento:</div>
+          <div id="agendar-resumo-text"
+            style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;color:var(--neon);"></div>
+        </div>
+        <button class="btn-wa" id="agendar-wa-btn" disabled onclick="enviarAgendamento()" style="opacity:.4;">📱 ENVIAR
+          PELO WHATSAPP</button>
       </div>
       <div class="seye">Jogo Principal</div>
       <div class="drillcard" onclick="goTo('log')" style="border-color:rgba(204,255,0,.3);">
@@ -3757,6 +3760,134 @@
     }
     updateTimer(); setInterval(updateTimer, 60000);
     document.querySelectorAll('.btn-neon').forEach(function (btn) { btn.addEventListener('pointermove', function (e) { var r = btn.getBoundingClientRect(); btn.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%'); btn.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%'); }); });
+
+    // ═══ AGENDAR JOGO ═══
+    var calDate = new Date(), selDay = null, selTime = null;
+    var meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    var diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+    function toggleAgendar() {
+      var p = document.getElementById('agendar-panel');
+      var a = document.getElementById('agendar-arrow');
+      if (p.style.display === 'none') {
+        p.style.display = 'block';
+        a.style.transform = 'rotate(180deg)';
+        renderCal();
+        renderTimeGrid();
+      } else {
+        p.style.display = 'none';
+        a.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    function calNav(dir) {
+      calDate.setMonth(calDate.getMonth() + dir);
+      renderCal();
+    }
+
+    function renderCal() {
+      var y = calDate.getFullYear(), m = calDate.getMonth();
+      document.getElementById('cal-month').textContent = meses[m] + ' ' + y;
+      var grid = document.getElementById('cal-grid');
+      grid.innerHTML = '';
+      var first = new Date(y, m, 1).getDay();
+      var days = new Date(y, m + 1, 0).getDate();
+      var today = new Date();
+      for (var i = 0; i < first; i++) {
+        var empty = document.createElement('div');
+        grid.appendChild(empty);
+      }
+      for (var d = 1; d <= days; d++) {
+        var btn = document.createElement('div');
+        var thisDate = new Date(y, m, d);
+        var isPast = thisDate < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        btn.textContent = d;
+        btn.style.cssText = 'height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;font-family:Montserrat,sans-serif;';
+        if (isPast) {
+          btn.style.color = 'var(--border)';
+          btn.style.cursor = 'default';
+        } else {
+          btn.style.color = 'var(--mid)';
+          btn.style.background = 'var(--surface2)';
+          btn.style.border = '1px solid var(--border)';
+          btn.onclick = (function (day, el) {
+            return function () { pickDay(day, el); };
+          })(d, btn);
+        }
+        if (selDay && selDay.d === d && selDay.m === m && selDay.y === y) {
+          btn.style.background = 'var(--neon)';
+          btn.style.color = 'var(--black)';
+          btn.style.border = '1px solid var(--neon)';
+        }
+        if (d === today.getDate() && m === today.getMonth() && y === today.getFullYear()) {
+          btn.style.border = '1.5px solid var(--neon)';
+        }
+        grid.appendChild(btn);
+      }
+    }
+
+    function pickDay(d, el) {
+      selDay = { d: d, m: calDate.getMonth(), y: calDate.getFullYear() };
+      renderCal();
+      checkAgendar();
+    }
+
+    function renderTimeGrid() {
+      var grid = document.getElementById('time-grid');
+      grid.innerHTML = '';
+      for (var h = 6; h <= 21; h++) {
+        var btn = document.createElement('div');
+        var label = (h < 10 ? '0' : '') + h + ':00';
+        btn.textContent = label;
+        btn.style.cssText = 'height:40px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;background:var(--surface2);border:1.5px solid var(--border);color:var(--mid);font-family:Montserrat,sans-serif;transition:all .2s;';
+        if (selTime === label) {
+          btn.style.background = 'var(--neon)';
+          btn.style.color = 'var(--black)';
+          btn.style.border = '1.5px solid var(--neon)';
+        }
+        btn.onclick = (function (l) {
+          return function () { selTime = l; renderTimeGrid(); checkAgendar(); };
+        })(label);
+        grid.appendChild(btn);
+      }
+    }
+
+    function checkAgendar() {
+      var btn = document.getElementById('agendar-wa-btn');
+      var sum = document.getElementById('agendar-summary');
+      if (selDay && selTime) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        sum.style.display = 'block';
+        var dt = new Date(selDay.y, selDay.m, selDay.d);
+        var dayName = diasSemana[dt.getDay()];
+        document.getElementById('agendar-resumo-text').textContent =
+          '📅 ' + dayName + ', ' + selDay.d + ' de ' + meses[selDay.m] + ' · ⏰ ' + selTime;
+      } else {
+        btn.disabled = true;
+        btn.style.opacity = '.4';
+        sum.style.display = 'none';
+      }
+    }
+
+    function enviarAgendamento() {
+      var dt = new Date(selDay.y, selDay.m, selDay.d);
+      var dayName = diasSemana[dt.getDay()];
+      var dateStr = selDay.d + '/' + (selDay.m + 1) + '/' + selDay.y;
+      var confirmLink = 'https://ace-roan.vercel.app/ace-app.html';
+      var txt = '🎾 *ACE — Jogo Agendado!*\n\n'
+        + '📅 *' + dayName + ', ' + selDay.d + ' de ' + meses[selDay.m] + '*\n'
+        + '⏰ *' + selTime + '*\n'
+        + '🏟️ Clube dos Coxos\n\n'
+        + '👉 *Confirme sua presença:*\n'
+        + confirmLink + '\n\n'
+        + '💪 Bora amassar! Te espero lá! 🎾';
+      window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank');
+      var t = document.getElementById('toast');
+      t.textContent = '📅 AGENDAMENTO ENVIADO!';
+      t.classList.add('show');
+      setTimeout(function () { t.classList.remove('show'); t.textContent = '🏆 RESULTADO SALVO! RANKING ATUALIZADO!'; }, 3500);
+    }
   </script>
 </body>
 
