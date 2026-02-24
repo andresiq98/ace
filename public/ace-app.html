@@ -3316,7 +3316,7 @@
       <div style="height:20px;"></div>
     </div>
 
-    <!-- ══ 11: CELEBRA\u00c7\u00c3O ══ -->
+    <!-- ══ 11: CELEBRAÇÃO ══ -->
     <div class="screen" id="celebracao"
       style="display:flex !important;flex-direction:column !important;justify-content:center !important;align-items:center !important;overflow:hidden !important;background:var(--black) !important;padding-bottom:10vh;">
       <div
@@ -3326,31 +3326,31 @@
         <div style="font-size:60px;margin-bottom:12px;">🏆</div>
         <div
           style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:36px;text-transform:uppercase;letter-spacing:-1px;margin-bottom:6px;">
-          VIT\u00d3RIA!</div>
+          VITÓRIA!</div>
         <div
           style="font-size:12px;color:var(--neon);font-weight:800;letter-spacing:3px;text-transform:uppercase;margin-bottom:20px;">
           +12.5 PONTOS NO RANKING</div>
         <div id="celeb-score"
           style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:52px;letter-spacing:-3px;color:var(--neon);text-shadow:0 0 40px rgba(204,255,0,.25);margin-bottom:8px;">
-          6\u00d74</div>
+          6×4</div>
         <div style="font-size:13px;color:var(--muted);margin-bottom:24px;">Carlos A. venceu <span
             id="celeb-rival">Rafael M.</span></div>
         <div
           style="display:inline-flex;align-items:center;gap:20px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 24px;margin-bottom:24px;">
           <div style="text-align:center;">
             <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Antes</div>
-            <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:24px;">3\u00b0</div>
+            <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:24px;">3°</div>
           </div>
-          <div style="font-size:18px;color:var(--neon);">\u2192</div>
+          <div style="font-size:18px;color:var(--neon);">→</div>
           <div style="text-align:center;">
             <div style="font-size:10px;color:var(--neon);margin-bottom:4px;">Agora</div>
-            <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:24px;color:var(--neon);">2\u00b0
+            <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:24px;color:var(--neon);">2°
             </div>
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:10px;width:220px;margin:0 auto;">
           <button class="btn-neon" onclick="goTo('share')">📤 COMPARTILHAR</button>
-          <button class="btn-ghost" onclick="goTo('resenha')">Voltar \u00e0 Arena</button>
+          <button class="btn-ghost" onclick="goTo('resenha')">Voltar à Arena</button>
         </div>
       </div>
     </div>
@@ -3876,7 +3876,7 @@
         var eCal = String.fromCodePoint(0x1F4C5);
         var eClk = String.fromCodePoint(0x23F0);
         document.getElementById('agendar-resumo-text').textContent =
-          eCal + ' ' + dayName + ', ' + selDay.d + ' de ' + meses[selDay.m] + ' \u00b7 ' + eClk + ' ' + selTime;
+          eCal + ' ' + dayName + ', ' + selDay.d + ' de ' + meses[selDay.m] + ' · ' + eClk + ' ' + selTime;
       } else {
         btn.disabled = true;
         btn.style.opacity = '.4';
@@ -3898,10 +3898,10 @@
         e3 + ' *' + selTime + '*',
         e4 + ' Clube dos Coxos',
         '',
-        e5 + ' *Confirme sua presen\u00e7a:*',
+        e5 + ' *Confirme sua presença:*',
         confirmLink,
         '',
-        e6 + ' Bora amassar! Te espero l\u00e1! ' + e1
+        e6 + ' Bora amassar! Te espero lá! ' + e1
       ];
       var txt = lines.join('\n');
       window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank');
