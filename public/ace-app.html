@@ -2185,7 +2185,8 @@
     .celebscreen {
       align-items: center;
       justify-content: center;
-      position: relative
+      position: relative;
+      overflow: hidden
     }
 
     .celeb-glow {
@@ -2198,7 +2199,13 @@
       text-align: center;
       position: relative;
       z-index: 1;
-      padding: 40px 30px
+      padding: 20px 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+      flex: 1
     }
 
     .celeb-emoji {
@@ -3873,20 +3880,27 @@
     function enviarAgendamento() {
       var dt = new Date(selDay.y, selDay.m, selDay.d);
       var dayName = diasSemana[dt.getDay()];
-      var dateStr = selDay.d + '/' + (selDay.m + 1) + '/' + selDay.y;
       var confirmLink = 'https://ace-roan.vercel.app/ace-app.html';
-      var txt = '🎾 *ACE — Jogo Agendado!*\n\n'
-        + '📅 *' + dayName + ', ' + selDay.d + ' de ' + meses[selDay.m] + '*\n'
-        + '⏰ *' + selTime + '*\n'
-        + '🏟️ Clube dos Coxos\n\n'
-        + '👉 *Confirme sua presença:*\n'
-        + confirmLink + '\n\n'
-        + '💪 Bora amassar! Te espero lá! 🎾';
+      var e1 = String.fromCodePoint(0x1F3BE), e2 = String.fromCodePoint(0x1F4C5), e3 = String.fromCodePoint(0x23F0);
+      var e4 = String.fromCodePoint(0x1F3DF, 0xFE0F), e5 = String.fromCodePoint(0x1F449), e6 = String.fromCodePoint(0x1F4AA);
+      var lines = [
+        e1 + ' *ACE \u2014 Jogo Agendado!*',
+        '',
+        e2 + ' *' + dayName + ', ' + selDay.d + ' de ' + meses[selDay.m] + '*',
+        e3 + ' *' + selTime + '*',
+        e4 + ' Clube dos Coxos',
+        '',
+        e5 + ' *Confirme sua presen\u00e7a:*',
+        confirmLink,
+        '',
+        e6 + ' Bora amassar! Te espero l\u00e1! ' + e1
+      ];
+      var txt = lines.join('\n');
       window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank');
       var t = document.getElementById('toast');
-      t.textContent = '📅 AGENDAMENTO ENVIADO!';
+      t.textContent = e2 + ' AGENDAMENTO ENVIADO!';
       t.classList.add('show');
-      setTimeout(function () { t.classList.remove('show'); t.textContent = '🏆 RESULTADO SALVO! RANKING ATUALIZADO!'; }, 3500);
+      setTimeout(function () { t.classList.remove('show'); t.textContent = String.fromCodePoint(0x1F3C6) + ' RESULTADO SALVO! RANKING ATUALIZADO!'; }, 3500);
     }
   </script>
 </body>
