@@ -2183,29 +2183,32 @@
     }
 
     .celebscreen {
-      align-items: center;
-      justify-content: center;
+      align-items: center !important;
+      justify-content: center !important;
       position: relative;
-      overflow: hidden
+      overflow: hidden !important;
+      overflow-y: hidden !important;
+      background: var(--black) !important
     }
 
     .celeb-glow {
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at center, rgba(204, 255, 0, .06) 0%, transparent 60%)
+      background: radial-gradient(circle at center, rgba(204, 255, 0, .06) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0
     }
 
     .celeb-inner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       text-align: center;
-      position: relative;
       z-index: 1;
       padding: 20px 30px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 0;
-      flex: 1
+      width: 80%;
+      max-width: 320px
     }
 
     .celeb-emoji {
@@ -3324,28 +3327,41 @@
     </div>
 
     <!-- ══ 11: CELEBRAÇÃO ══ -->
-    <div class="screen celebscreen" id="celebracao">
-      <div class="celeb-glow"></div>
-      <div class="celeb-inner">
-        <div class="celeb-emoji">🏆</div>
-        <div class="celeb-title">VITÓRIA!</div>
-        <div class="celeb-pts">+12.5 PONTOS NO RANKING</div>
-        <div class="celeb-score" id="celeb-score">6×4</div>
-        <div class="celeb-sub">Carlos A. venceu <span id="celeb-rival">Rafael M.</span></div>
-        <div class="celeb-rank">
-          <div class="celeb-rank-col">
-            <div class="celeb-rank-label">Antes</div>
-            <div class="celeb-rank-val">3°</div>
+    <div class="screen" id="celebracao" style="overflow:hidden !important;background:var(--black) !important;">
+      <div
+        style="position:absolute;inset:0;background:radial-gradient(circle at center, rgba(204,255,0,.06) 0%, transparent 60%);pointer-events:none;z-index:0;">
+      </div>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:1;">
+        <div style="text-align:center;padding:20px 30px;">
+          <div style="font-size:60px;margin-bottom:12px;">🏆</div>
+          <div
+            style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:36px;text-transform:uppercase;letter-spacing:-1px;margin-bottom:6px;">
+            VITÓRIA!</div>
+          <div
+            style="font-size:12px;color:var(--neon);font-weight:800;letter-spacing:3px;text-transform:uppercase;margin-bottom:20px;">
+            +12.5 PONTOS NO RANKING</div>
+          <div id="celeb-score"
+            style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:52px;letter-spacing:-3px;color:var(--neon);text-shadow:0 0 40px rgba(204,255,0,.25);margin-bottom:8px;">
+            6×4</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:24px;">Carlos A. venceu <span
+              id="celeb-rival">Rafael M.</span></div>
+          <div
+            style="display:inline-flex;align-items:center;gap:20px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 24px;margin-bottom:24px;">
+            <div style="text-align:center;">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Antes</div>
+              <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:24px;">3°</div>
+            </div>
+            <div style="font-size:18px;color:var(--neon);">→</div>
+            <div style="text-align:center;">
+              <div style="font-size:10px;color:var(--neon);margin-bottom:4px;">Agora</div>
+              <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:24px;color:var(--neon);">2°
+              </div>
+            </div>
           </div>
-          <div class="celeb-rank-arr">→</div>
-          <div class="celeb-rank-col">
-            <div class="celeb-rank-label" style="color:var(--neon);">Agora</div>
-            <div class="celeb-rank-val" style="color:var(--neon);">2°</div>
+          <div style="display:flex;flex-direction:column;gap:10px;width:220px;margin:0 auto;">
+            <button class="btn-neon" onclick="goTo('share')">📤 COMPARTILHAR</button>
+            <button class="btn-ghost" onclick="goTo('resenha')">Voltar à Arena</button>
           </div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:10px;width:220px;">
-          <button class="btn-neon" onclick="goTo('share')">📤 COMPARTILHAR</button>
-          <button class="btn-ghost" onclick="goTo('resenha')">Voltar à Arena</button>
         </div>
       </div>
     </div>
