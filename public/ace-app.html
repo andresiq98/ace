@@ -1,0 +1,3763 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ACE — Tênis Competitivo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --black: #09090B;
+      --neon: #CCFF00;
+      --neon-dim: #A8D400;
+      --neon-glow: rgba(204, 255, 0, .25);
+      --red: #EF4444;
+      --gold: #FFD700;
+      --white: #FAFAFA;
+      --green: #25D366;
+      --blue: #2979FF;
+      --surface: #111113;
+      --surface2: #18181B;
+      --surface3: #1E1E21;
+      --border: #27272A;
+      --border-light: #3F3F46;
+      --muted: #52525B;
+      --mid: #A1A1AA;
+      --r: 16px;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1)
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent
+    }
+
+    html {
+      overflow: hidden;
+      height: 100%
+    }
+
+    body {
+      background: #000;
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100%;
+      overflow: hidden
+    }
+
+    .phone {
+      width: 100%;
+      max-width: 430px;
+      height: 100vh;
+      height: 100dvh;
+      position: relative;
+      overflow: hidden;
+      background: var(--black)
+    }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      background: var(--black);
+      scrollbar-width: none;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(40px);
+      transition: all .5s var(--ease-out-expo);
+      will-change: transform, opacity;
+      -webkit-overflow-scrolling: touch
+    }
+
+    .screen::-webkit-scrollbar {
+      display: none
+    }
+
+    .screen.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(0)
+    }
+
+    .screen.exit-left {
+      opacity: 0;
+      transform: translateX(-60px);
+      pointer-events: none
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 56px 20px 14px;
+      position: sticky;
+      top: 0;
+      background: rgba(9, 9, 11, .92);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      z-index: 50;
+      border-bottom: 1px solid rgba(255, 255, 255, .04)
+    }
+
+    .tlogo {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 22px;
+      letter-spacing: -1.5px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .tlogo .ball-mini {
+      width: 22px;
+      height: 22px;
+      background: var(--neon);
+      border-radius: 50%;
+      position: relative;
+      box-shadow: 0 0 16px var(--neon-glow)
+    }
+
+    .tlogo .ball-mini::after {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(0, 0, 0, .2)
+    }
+
+    .tlogo .n {
+      color: var(--neon);
+      text-shadow: 0 0 30px rgba(204, 255, 0, .3)
+    }
+
+    .tactions {
+      display: flex;
+      gap: 8px
+    }
+
+    .ibtn {
+      width: 38px;
+      height: 38px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 15px;
+      transition: all .2s var(--ease-smooth);
+      position: relative;
+      overflow: hidden
+    }
+
+    .ibtn:active {
+      transform: scale(.9);
+      border-color: var(--neon)
+    }
+
+    .backbtn {
+      width: 38px;
+      height: 38px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      color: var(--white);
+      transition: all .2s var(--ease-smooth)
+    }
+
+    .backbtn:active {
+      transform: scale(.88);
+      background: var(--neon);
+      color: var(--black);
+      border-color: var(--neon)
+    }
+
+    .ttitle {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--mid)
+    }
+
+    .bnav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      z-index: 1000;
+      padding: 0 14px 24px;
+      pointer-events: auto
+    }
+
+    .navi {
+      background: rgba(17, 17, 19, .96);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, .06);
+      border-radius: 20px;
+      display: flex;
+      overflow: hidden;
+      box-shadow: 0 -4px 40px rgba(0, 0, 0, .5)
+    }
+
+    .ni {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 14px 8px 12px;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      transition: all .25s var(--ease-smooth);
+      font-family: 'Montserrat', sans-serif;
+      position: relative
+    }
+
+    .ni svg {
+      width: 20px;
+      height: 20px;
+      transition: transform .25s var(--ease-spring)
+    }
+
+    .ni.on {
+      color: var(--neon)
+    }
+
+    .ni.on::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 20%;
+      right: 20%;
+      height: 2px;
+      background: var(--neon);
+      border-radius: 0 0 2px 2px;
+      box-shadow: 0 0 12px var(--neon-glow)
+    }
+
+    .ni.on svg {
+      transform: scale(1.15)
+    }
+
+    .ni:active svg {
+      transform: scale(.85)
+    }
+
+    .btn-neon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      height: 58px;
+      background: var(--neon);
+      color: var(--black);
+      border: none;
+      border-radius: 14px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      width: 100%;
+      transition: all .2s var(--ease-smooth);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(204, 255, 0, .2), inset 0 1px 0 rgba(255, 255, 255, .2)
+    }
+
+    .btn-neon::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .15) 0%, transparent 50%);
+      pointer-events: none
+    }
+
+    .btn-neon:active {
+      transform: scale(.96);
+      box-shadow: 0 2px 12px rgba(204, 255, 0, .3)
+    }
+
+    .btn-neon:disabled {
+      opacity: .25;
+      pointer-events: none;
+      box-shadow: none
+    }
+
+    .btn-ghost {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 52px;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--mid);
+      cursor: pointer;
+      width: 100%;
+      transition: all .2s var(--ease-smooth)
+    }
+
+    .btn-ghost:active {
+      border-color: var(--neon);
+      color: var(--neon);
+      transform: scale(.97);
+      background: rgba(204, 255, 0, .03)
+    }
+
+    .btn-wa {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      height: 58px;
+      background: var(--green);
+      border: none;
+      border-radius: 14px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: white;
+      cursor: pointer;
+      width: 100%;
+      transition: all .2s;
+      box-shadow: 0 4px 20px rgba(37, 211, 102, .2)
+    }
+
+    .btn-wa:active {
+      transform: scale(.97)
+    }
+
+    .bwrap {
+      padding: 8px 20px 16px
+    }
+
+    .bsticky {
+      position: sticky;
+      bottom: 0;
+      padding: 12px 20px 110px;
+      background: linear-gradient(0deg, var(--black) 60%, transparent);
+      z-index: 10
+    }
+
+    .ptitle {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 38px;
+      text-transform: uppercase;
+      letter-spacing: -2px;
+      line-height: .92;
+      padding: 12px 20px 22px
+    }
+
+    .ptitle .n {
+      color: var(--neon);
+      text-shadow: 0 0 40px rgba(204, 255, 0, .2)
+    }
+
+    .seye {
+      font-size: 9px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--muted);
+      font-family: 'Montserrat', sans-serif;
+      padding: 0 20px;
+      margin-bottom: 12px
+    }
+
+    #splash {
+      align-items: center;
+      justify-content: center;
+      background: var(--black);
+      position: relative;
+      overflow: hidden;
+      transform: none !important
+    }
+
+    #splash.active {
+      opacity: 1
+    }
+
+    .splash-bg {
+      position: absolute;
+      inset: 0;
+      overflow: hidden
+    }
+
+    .sglow {
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(204, 255, 0, .08) 0%, transparent 65%);
+      top: -120px;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+      animation: pulseGlow 4s ease-in-out infinite
+    }
+
+    .sglow2 {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(204, 255, 0, .04) 0%, transparent 70%);
+      bottom: 10%;
+      right: -60px;
+      animation: pulseGlow 5s ease-in-out infinite 1s
+    }
+
+    @keyframes pulseGlow {
+
+      0%,
+      100% {
+        transform: translateX(-50%) scale(1);
+        opacity: 1
+      }
+
+      50% {
+        transform: translateX(-50%) scale(1.15);
+        opacity: .7
+      }
+    }
+
+    .sinner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 36px;
+      width: 100%;
+      position: relative;
+      z-index: 1
+    }
+
+    .sbrand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 32px
+    }
+
+    .splash-ball {
+      width: 80px;
+      height: 80px;
+      position: relative;
+      animation: floatBall 3s ease-in-out infinite
+    }
+
+    .splash-ball-inner {
+      width: 80px;
+      height: 80px;
+      background: var(--neon);
+      border-radius: 50%;
+      box-shadow: 0 0 60px rgba(204, 255, 0, .4), 0 0 120px rgba(204, 255, 0, .15);
+      position: relative;
+      overflow: hidden
+    }
+
+    .splash-ball-inner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at 35% 30%, rgba(255, 255, 255, .35) 0%, transparent 50%)
+    }
+
+    .splash-ball-seam {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      overflow: hidden
+    }
+
+    .splash-ball-seam::before,
+    .splash-ball-seam::after {
+      content: '';
+      position: absolute;
+      border: 2px solid rgba(0, 0, 0, .2);
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%)
+    }
+
+    .splash-ball-seam::before {
+      width: 100%;
+      height: 45%
+    }
+
+    .splash-ball-seam::after {
+      width: 45%;
+      height: 100%
+    }
+
+    @keyframes floatBall {
+
+      0%,
+      100% {
+        transform: translateY(0) rotate(0deg)
+      }
+
+      50% {
+        transform: translateY(-12px) rotate(5deg)
+      }
+    }
+
+    .sword {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 80px;
+      letter-spacing: -4px;
+      text-transform: uppercase;
+      line-height: 1;
+      color: var(--white);
+      text-shadow: 0 0 80px rgba(255, 255, 255, .08)
+    }
+
+    .ssub {
+      font-size: 10px;
+      letter-spacing: 7px;
+      font-weight: 700;
+      color: var(--neon);
+      text-transform: uppercase;
+      text-shadow: 0 0 20px rgba(204, 255, 0, .4)
+    }
+
+    .stag {
+      font-size: 15px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.7;
+      font-style: italic;
+      margin-bottom: 48px;
+      max-width: 260px
+    }
+
+    .hband {
+      background: linear-gradient(180deg, #0C1400 0%, var(--black) 100%);
+      padding: 20px 20px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden
+    }
+
+    .hband::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 300px;
+      height: 200px;
+      background: radial-gradient(ellipse, rgba(204, 255, 0, .06) 0%, transparent 70%);
+      pointer-events: none
+    }
+
+    .havwrap {
+      position: relative;
+      width: 84px;
+      margin: 0 auto 12px
+    }
+
+    .hav {
+      width: 84px;
+      height: 84px;
+      border-radius: 50%;
+      background: var(--neon);
+      color: var(--black);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid var(--neon);
+      box-shadow: 0 0 40px rgba(204, 255, 0, .3), 0 0 80px rgba(204, 255, 0, .1);
+      position: relative
+    }
+
+    .hav::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 2px solid rgba(204, 255, 0, .15);
+      animation: ringPulse 2s ease-in-out infinite
+    }
+
+    @keyframes ringPulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 1
+      }
+
+      50% {
+        transform: scale(1.08);
+        opacity: .3
+      }
+    }
+
+    .hbadge {
+      position: absolute;
+      bottom: -5px;
+      right: -10px;
+      background: var(--gold);
+      color: var(--black);
+      font-size: 9px;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 8px;
+      white-space: nowrap;
+      font-family: 'Montserrat', sans-serif;
+      letter-spacing: .5px;
+      box-shadow: 0 2px 12px rgba(255, 215, 0, .3)
+    }
+
+    .hgreet {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 24px;
+      text-transform: uppercase;
+      letter-spacing: -1px;
+      margin-bottom: 3px
+    }
+
+    .hsub {
+      font-size: 13px;
+      color: var(--muted)
+    }
+
+    .ctamain {
+      margin: 16px 20px 20px;
+      background: var(--neon);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 20px 24px;
+      cursor: pointer;
+      transition: all .2s var(--ease-smooth);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 6px 32px rgba(204, 255, 0, .25), 0 0 0 1px rgba(204, 255, 0, .3)
+    }
+
+    .ctamain::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .18) 0%, transparent 40%);
+      pointer-events: none
+    }
+
+    .ctamain:active {
+      transform: scale(.97);
+      box-shadow: 0 3px 16px rgba(204, 255, 0, .3)
+    }
+
+    .cta-icon {
+      font-size: 36px;
+      margin-bottom: 8px;
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, .2));
+      animation: ctaBounce 2s ease-in-out infinite
+    }
+
+    @keyframes ctaBounce {
+
+      0%,
+      100% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(-4px)
+      }
+    }
+
+    .cta-text {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 16px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--black);
+      text-shadow: 0 1px 0 rgba(255, 255, 255, .2)
+    }
+
+    .cta-sub {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(0, 0, 0, .45);
+      margin-top: 4px;
+      letter-spacing: 1px
+    }
+
+    .srow {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 0 20px;
+      margin-bottom: 24px
+    }
+
+    .scard {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+      transition: all .2s
+    }
+
+    .scard::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--neon), rgba(204, 255, 0, .3))
+    }
+
+    .slabel {
+      font-size: 9px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--muted);
+      font-family: 'Montserrat', sans-serif;
+      margin-bottom: 8px
+    }
+
+    .sval {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 38px;
+      letter-spacing: -2px;
+      line-height: 1
+    }
+
+    .ssub2 {
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 6px
+    }
+
+    .ssub2.up {
+      color: var(--neon)
+    }
+
+    .ssub2.neu {
+      color: var(--muted)
+    }
+
+    .fhdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 20px 12px
+    }
+
+    .ftitle {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .fall {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--neon);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer
+    }
+
+    .fcard {
+      margin: 0 20px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+      transition: all .2s;
+      animation: cardIn .5s var(--ease-out-expo) both
+    }
+
+    @keyframes cardIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .fctop {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px 10px
+    }
+
+    .fav {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 12px;
+      flex-shrink: 0;
+      border: 2px solid rgba(255, 255, 255, .08)
+    }
+
+    .fmeta {
+      flex: 1
+    }
+
+    .fname {
+      font-weight: 700;
+      font-size: 14px
+    }
+
+    .ftime {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px
+    }
+
+    .fchip {
+      background: var(--neon);
+      color: var(--black);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 12px;
+      letter-spacing: 1px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(204, 255, 0, .15)
+    }
+
+    .fbody {
+      padding: 0 16px 12px;
+      font-size: 13px;
+      color: var(--mid);
+      line-height: 1.6
+    }
+
+    .fbody strong {
+      color: var(--neon);
+      font-weight: 700
+    }
+
+    .freact {
+      display: flex;
+      gap: 8px;
+      padding: 10px 16px;
+      border-top: 1px solid rgba(255, 255, 255, .04)
+    }
+
+    .rbtn {
+      flex: 1;
+      height: 36px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--mid);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      font-family: 'Montserrat', sans-serif;
+      letter-spacing: .5px;
+      transition: all .2s var(--ease-smooth)
+    }
+
+    .rbtn:active {
+      border-color: var(--neon);
+      color: var(--neon);
+      transform: scale(.95);
+      background: rgba(204, 255, 0, .05)
+    }
+
+    .drillcard {
+      margin: 0 20px 12px;
+      background: var(--surface);
+      border: 1px solid rgba(204, 255, 0, .15);
+      border-radius: var(--r);
+      padding: 16px;
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      cursor: pointer;
+      transition: all .2s
+    }
+
+    .drillcard:active {
+      transform: scale(.98);
+      border-color: var(--neon)
+    }
+
+    .drillico {
+      width: 48px;
+      height: 48px;
+      background: var(--surface2);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0
+    }
+
+    .drillinfo {
+      flex: 1
+    }
+
+    .drillname {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: .3px;
+      margin-bottom: 3px
+    }
+
+    .drilldesc {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.4
+    }
+
+    .drillbonus {
+      font-size: 9px;
+      background: var(--neon);
+      color: var(--black);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 800;
+      font-family: 'Montserrat', sans-serif;
+      letter-spacing: .5px
+    }
+
+    .rhero {
+      background: linear-gradient(180deg, #0C1400 0%, var(--black) 100%);
+      padding: 20px 20px 24px;
+      position: relative;
+      overflow: hidden
+    }
+
+    .rhero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 400px;
+      height: 200px;
+      background: radial-gradient(ellipse, rgba(204, 255, 0, .05) 0%, transparent 70%);
+      pointer-events: none
+    }
+
+    .mpc {
+      background: var(--surface);
+      border: 1px solid rgba(204, 255, 0, .2);
+      border-radius: var(--r);
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      position: relative;
+      overflow: hidden
+    }
+
+    .mpc::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--neon);
+      box-shadow: 0 0 12px var(--neon-glow)
+    }
+
+    .mpnum {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 42px;
+      letter-spacing: -3px;
+      line-height: 1;
+      color: var(--neon);
+      padding-left: 12px
+    }
+
+    .mpinfo .nm {
+      font-weight: 700;
+      font-size: 15px
+    }
+
+    .mpinfo .dt {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 3px
+    }
+
+    .mppts {
+      margin-left: auto;
+      text-align: right
+    }
+
+    .mppts .num {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--neon);
+      letter-spacing: -1px
+    }
+
+    .mppts span {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--muted);
+      display: block
+    }
+
+    .podium {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 8px;
+      padding: 20px 20px 0
+    }
+
+    .pod-col {
+      text-align: center;
+      flex: 1
+    }
+
+    .pod-av {
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      margin: 0 auto;
+      border: 2px solid rgba(255, 255, 255, .08)
+    }
+
+    .pod-name {
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 4px
+    }
+
+    .pod-bar {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px 8px 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 6px
+    }
+
+    .pod-pos {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      letter-spacing: -1px
+    }
+
+    .rlist {
+      padding: 16px 20px 0
+    }
+
+    .rltitle {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 10px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px
+    }
+
+    .rrow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, .04);
+      transition: all .2s;
+      animation: rowIn .4s var(--ease-out-expo) both
+    }
+
+    @keyframes rowIn {
+      from {
+        opacity: 0;
+        transform: translateX(-16px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0)
+      }
+    }
+
+    .rrow:last-child {
+      border-bottom: none
+    }
+
+    .rrow.me {
+      background: rgba(204, 255, 0, .03);
+      border-radius: 12px;
+      padding: 14px 12px;
+      margin: 0 -12px;
+      border-bottom: none;
+      border: 1px solid rgba(204, 255, 0, .08)
+    }
+
+    .rpos {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 20px;
+      width: 28px;
+      text-align: center;
+      flex-shrink: 0
+    }
+
+    .rpos.g {
+      color: var(--gold)
+    }
+
+    .rpos.s {
+      color: #C0C0C0
+    }
+
+    .rpos.b {
+      color: #CD7F32
+    }
+
+    .rpos.r {
+      color: var(--red)
+    }
+
+    .rav {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 13px;
+      flex-shrink: 0;
+      position: relative
+    }
+
+    .ravb {
+      position: absolute;
+      bottom: -4px;
+      right: -4px;
+      font-size: 12px;
+      width: 20px;
+      height: 20px;
+      background: var(--black);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border)
+    }
+
+    .rinfo {
+      flex: 1;
+      min-width: 0
+    }
+
+    .rname {
+      font-weight: 700;
+      font-size: 14px
+    }
+
+    .rsub {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 3px
+    }
+
+    .rsub.n {
+      color: var(--neon);
+      font-weight: 700
+    }
+
+    .rsub.r2 {
+      color: var(--red);
+      font-weight: 700
+    }
+
+    .rpts {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 17px;
+      color: var(--neon);
+      letter-spacing: -1px
+    }
+
+    .chiprow {
+      display: flex;
+      gap: 6px;
+      padding: 0 20px;
+      margin-bottom: 16px
+    }
+
+    .chipbtn {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border: 1.5px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .2s;
+      background: transparent
+    }
+
+    .chipbtn.on {
+      border-color: var(--neon);
+      color: var(--neon);
+      background: rgba(204, 255, 0, .06)
+    }
+
+    .chipbtn:active {
+      transform: scale(.95)
+    }
+
+    .invrow {
+      margin: 20px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between
+    }
+
+    .invlabel {
+      font-size: 12px;
+      color: var(--muted)
+    }
+
+    .invcode {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 18px;
+      letter-spacing: 5px;
+      color: var(--neon);
+      text-shadow: 0 0 20px rgba(204, 255, 0, .2)
+    }
+
+    .tipogrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 0 20px;
+      margin-bottom: 24px
+    }
+
+    .tipocard {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: var(--r);
+      padding: 22px 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .25s var(--ease-smooth);
+      position: relative;
+      overflow: hidden
+    }
+
+    .tipocard:active {
+      transform: scale(.96)
+    }
+
+    .tipocard.on {
+      border-color: var(--neon);
+      background: rgba(204, 255, 0, .04)
+    }
+
+    .tipocard.dis {
+      opacity: .3;
+      pointer-events: none
+    }
+
+    .ticheck {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 22px;
+      height: 22px;
+      background: var(--neon);
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 900;
+      color: var(--black)
+    }
+
+    .tipocard.on .ticheck {
+      display: flex
+    }
+
+    .tiicon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin: 0 auto 12px
+    }
+
+    .tiname {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 4px
+    }
+
+    .tidesc {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.4
+    }
+
+    .segwrap {
+      padding: 0 20px;
+      margin-bottom: 20px
+    }
+
+    .seglabel {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 10px
+    }
+
+    .segtrack {
+      display: flex;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+      gap: 4px
+    }
+
+    .segbtn {
+      flex: 1;
+      height: 42px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 14px;
+      letter-spacing: 1px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .25s var(--ease-smooth)
+    }
+
+    .segbtn.on {
+      background: var(--neon);
+      color: var(--black);
+      box-shadow: 0 2px 12px rgba(204, 255, 0, .2)
+    }
+
+    .segbtn:active {
+      transform: scale(.94)
+    }
+
+    .galscroll {
+      display: flex;
+      gap: 18px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding: 0 20px 4px
+    }
+
+    .galscroll::-webkit-scrollbar {
+      display: none
+    }
+
+    .galitem {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all .25s var(--ease-smooth)
+    }
+
+    .galav {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 16px;
+      border: 2.5px solid var(--border);
+      transition: all .25s var(--ease-spring)
+    }
+
+    .galitem.on .galav {
+      border-color: var(--neon);
+      box-shadow: 0 0 20px rgba(204, 255, 0, .3);
+      transform: scale(1.08)
+    }
+
+    .galname {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted)
+    }
+
+    .galitem.on .galname {
+      color: var(--neon)
+    }
+
+    .galitem:active .galav {
+      transform: scale(.9)
+    }
+
+    .logvs {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 0 20px 24px
+    }
+
+    .logp {
+      text-align: center;
+      flex: 1
+    }
+
+    .logav {
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      margin: 0 auto 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 20px;
+      border: 2.5px solid var(--border)
+    }
+
+    .logpname {
+      font-weight: 700;
+      font-size: 14px
+    }
+
+    .logyou {
+      font-size: 10px;
+      color: var(--neon);
+      font-weight: 700;
+      margin-top: 3px;
+      letter-spacing: 1px
+    }
+
+    .logvssep {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 20px;
+      color: var(--muted);
+      letter-spacing: 2px
+    }
+
+    .stephead {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--muted);
+      padding: 0 20px;
+      margin-bottom: 14px
+    }
+
+    .wgrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 0 20px;
+      margin-bottom: 28px
+    }
+
+    .wcard {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: var(--r);
+      padding: 20px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .25s var(--ease-smooth)
+    }
+
+    .wcard:active {
+      transform: scale(.96)
+    }
+
+    .wcard.on {
+      border-color: var(--neon);
+      background: rgba(204, 255, 0, .04)
+    }
+
+    .wcav {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      margin: 0 auto 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 16px
+    }
+
+    .wcname {
+      font-weight: 800;
+      font-size: 15px;
+      font-family: 'Montserrat', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: .3px
+    }
+
+    .wcard.on .wcname {
+      color: var(--neon)
+    }
+
+    .wcyou {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 3px
+    }
+
+    .sgrid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      padding: 0 20px;
+      margin-bottom: 28px
+    }
+
+    .sbtn2 {
+      height: 52px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 14px;
+      font-weight: 900;
+      color: var(--mid);
+      cursor: pointer;
+      transition: all .2s var(--ease-smooth);
+      letter-spacing: .5px
+    }
+
+    .sbtn2:active {
+      transform: scale(.94)
+    }
+
+    .sbtn2.on {
+      border-color: var(--neon);
+      background: rgba(204, 255, 0, .06);
+      color: var(--neon);
+      box-shadow: 0 0 12px rgba(204, 255, 0, .1)
+    }
+
+    .mvpscroll {
+      display: flex;
+      gap: 10px;
+      padding: 0 20px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none
+    }
+
+    .mvpscroll::-webkit-scrollbar {
+      display: none
+    }
+
+    .mvpchip {
+      flex-shrink: 0;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 24px;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s var(--ease-smooth);
+      color: var(--muted)
+    }
+
+    .mvpchip:active {
+      transform: scale(.95)
+    }
+
+    .mvpchip.on {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(255, 215, 0, .06)
+    }
+
+    .mvpchip.none.on {
+      border-color: var(--border);
+      color: var(--mid)
+    }
+
+    .mvpav {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 10px;
+      flex-shrink: 0
+    }
+
+    .ptsprev {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 0 20px;
+      margin-bottom: 24px
+    }
+
+    .ptschip {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(204, 255, 0, .06);
+      border: 1px solid rgba(204, 255, 0, .15);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--neon);
+      font-family: 'Montserrat', sans-serif
+    }
+
+    .shcard {
+      margin: 0 16px 16px;
+      background: linear-gradient(155deg, #0C1400 0%, #09090B 60%);
+      border: 1px solid rgba(204, 255, 0, .15);
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, .5), 0 0 60px rgba(204, 255, 0, .03)
+    }
+
+    .schdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, .03)
+    }
+
+    .sclogo {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: -.5px
+    }
+
+    .sclogo .n {
+      color: var(--neon)
+    }
+
+    .scres {
+      padding: 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, .03);
+      text-align: center
+    }
+
+    .scmtag {
+      font-size: 8px;
+      letter-spacing: 5px;
+      color: var(--neon);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-family: 'Montserrat', sans-serif;
+      margin-bottom: 14px
+    }
+
+    .scvsrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px
+    }
+
+    .scplayer {
+      text-align: center;
+      flex: 1
+    }
+
+    .scav {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      margin: 0 auto 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 17px;
+      border: 2px solid var(--neon);
+      box-shadow: 0 0 16px rgba(204, 255, 0, .15)
+    }
+
+    .scav.dim {
+      border-color: var(--border);
+      opacity: .4;
+      box-shadow: none
+    }
+
+    .scpname {
+      font-weight: 700;
+      font-size: 13px
+    }
+
+    .scwin {
+      font-size: 9px;
+      font-weight: 800;
+      color: var(--neon);
+      margin-top: 4px;
+      font-family: 'Montserrat', sans-serif;
+      letter-spacing: 1.5px
+    }
+
+    .scscorebig {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 44px;
+      letter-spacing: -1px
+    }
+
+    .sctop3 {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, .03)
+    }
+
+    .sct3title {
+      font-size: 8px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      margin-bottom: 12px
+    }
+
+    .scrrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px
+    }
+
+    .scrn {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 14px;
+      width: 18px
+    }
+
+    .scrav {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 9px
+    }
+
+    .scrname {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 600
+    }
+
+    .scrpts {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--neon)
+    }
+
+    .scbadges {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, .03)
+    }
+
+    .scbadge {
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center
+    }
+
+    .scbadge.gold {
+      background: rgba(255, 215, 0, .05);
+      border: 1px solid rgba(255, 215, 0, .15)
+    }
+
+    .scbadge.red {
+      background: rgba(239, 68, 68, .05);
+      border: 1px solid rgba(239, 68, 68, .12)
+    }
+
+    .scbemoji {
+      font-size: 24px;
+      display: block;
+      margin-bottom: 4px
+    }
+
+    .scblabel {
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-family: 'Montserrat', sans-serif
+    }
+
+    .scbadge.gold .scblabel {
+      color: var(--gold)
+    }
+
+    .scbadge.red .scblabel {
+      color: var(--red)
+    }
+
+    .scbplayer {
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 3px
+    }
+
+    .scinvite {
+      padding: 14px 18px;
+      text-align: center
+    }
+
+    .sccode {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 22px;
+      letter-spacing: 6px;
+      color: var(--neon);
+      display: block;
+      text-shadow: 0 0 20px rgba(204, 255, 0, .2)
+    }
+
+    .schint {
+      font-size: 9px;
+      letter-spacing: 4px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-top: 3px;
+      font-family: 'Montserrat', sans-serif
+    }
+
+    .profhero {
+      background: linear-gradient(180deg, #0C1400 0%, var(--black) 100%);
+      padding: 20px 20px 28px;
+      text-align: center;
+      position: relative;
+      overflow: hidden
+    }
+
+    .profhero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 400px;
+      height: 250px;
+      background: radial-gradient(ellipse, rgba(204, 255, 0, .06) 0%, transparent 60%);
+      pointer-events: none
+    }
+
+    .profavwrap {
+      position: relative;
+      width: 92px;
+      margin: 0 auto 14px
+    }
+
+    .profav {
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      background: var(--neon);
+      color: var(--black);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid var(--neon);
+      box-shadow: 0 0 48px rgba(204, 255, 0, .3), 0 0 96px rgba(204, 255, 0, .1);
+      position: relative
+    }
+
+    .profav::before {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      border: 2px solid rgba(204, 255, 0, .12);
+      animation: ringPulse 2.5s ease-in-out infinite
+    }
+
+    .profbadge {
+      position: absolute;
+      bottom: -5px;
+      right: -10px;
+      background: var(--gold);
+      color: var(--black);
+      font-size: 9px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-family: 'Montserrat', sans-serif;
+      letter-spacing: .5px;
+      white-space: nowrap;
+      box-shadow: 0 2px 12px rgba(255, 215, 0, .3)
+    }
+
+    .profname {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 26px;
+      text-transform: uppercase;
+      letter-spacing: -1px;
+      margin-bottom: 3px
+    }
+
+    .profstats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      padding: 0 20px;
+      margin-bottom: 24px
+    }
+
+    .profstat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 16px 10px;
+      text-align: center;
+      position: relative;
+      overflow: hidden
+    }
+
+    .profstat::before {
+      content: '';
+      display: block;
+      width: 28px;
+      height: 2px;
+      background: var(--neon);
+      margin: 0 auto 12px;
+      border-radius: 1px;
+      box-shadow: 0 0 8px rgba(204, 255, 0, .3)
+    }
+
+    .pstatval {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 32px;
+      letter-spacing: -1px;
+      line-height: 1;
+      color: var(--neon)
+    }
+
+    .pstatlabel {
+      font-size: 9px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--muted);
+      margin-top: 6px;
+      font-family: 'Montserrat', sans-serif
+    }
+
+    .histitem {
+      margin: 0 20px 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px
+    }
+
+    .histvd {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 11px
+    }
+
+    .histvd.v {
+      background: rgba(204, 255, 0, .1);
+      color: var(--neon)
+    }
+
+    .histvd.d {
+      background: rgba(239, 68, 68, .1);
+      color: var(--red)
+    }
+
+    .histinfo {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 600
+    }
+
+    .histscore {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 14px
+    }
+
+    .notifitem {
+      margin: 0 20px 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px
+    }
+
+    .notifitem.neon-l {
+      border-left: 3px solid var(--neon)
+    }
+
+    .notifitem.gold-l {
+      border-left: 3px solid var(--gold)
+    }
+
+    .notifitem.red-l {
+      border-left: 3px solid var(--red)
+    }
+
+    .notifemoji {
+      font-size: 20px;
+      flex-shrink: 0;
+      margin-top: 2px
+    }
+
+    .notiftitle {
+      font-weight: 700;
+      font-size: 13px;
+      margin-bottom: 3px
+    }
+
+    .notifsub {
+      font-size: 11px;
+      color: var(--muted)
+    }
+
+    .celebscreen {
+      align-items: center;
+      justify-content: center;
+      position: relative
+    }
+
+    .celeb-glow {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(204, 255, 0, .06) 0%, transparent 60%)
+    }
+
+    .celeb-inner {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      padding: 40px 30px
+    }
+
+    .celeb-emoji {
+      font-size: 60px;
+      margin-bottom: 12px
+    }
+
+    .celeb-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 36px;
+      text-transform: uppercase;
+      letter-spacing: -1px;
+      margin-bottom: 6px
+    }
+
+    .celeb-pts {
+      font-size: 12px;
+      color: var(--neon);
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 20px
+    }
+
+    .celeb-score {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 52px;
+      letter-spacing: 2px;
+      margin-bottom: 4px
+    }
+
+    .celeb-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 24px
+    }
+
+    .celeb-rank {
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 20px;
+      margin-bottom: 28px
+    }
+
+    .celeb-rank-col {
+      text-align: center
+    }
+
+    .celeb-rank-label {
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted)
+    }
+
+    .celeb-rank-val {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 28px
+    }
+
+    .celeb-rank-arr {
+      font-size: 22px;
+      color: var(--neon)
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0);
+      z-index: 200;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      transition: background .3s
+    }
+
+    .overlay.open {
+      display: flex;
+      background: rgba(0, 0, 0, .8)
+    }
+
+    .sheet {
+      width: 100%;
+      max-width: 430px;
+      background: var(--surface);
+      border-radius: 24px 24px 0 0;
+      padding: 28px 20px 48px;
+      transform: translateY(100%);
+      transition: transform .4s var(--ease-out-expo);
+      border-top: 1px solid rgba(255, 255, 255, .06)
+    }
+
+    .overlay.open .sheet {
+      transform: translateY(0)
+    }
+
+    .shandle {
+      width: 44px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 0 auto 22px
+    }
+
+    .shtitle {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 24px;
+      text-transform: uppercase;
+      letter-spacing: -1px;
+      margin-bottom: 24px
+    }
+
+    .inpblock {
+      margin-bottom: 18px
+    }
+
+    .inplabel {
+      font-size: 9px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--muted);
+      font-family: 'Montserrat', sans-serif;
+      display: block;
+      margin-bottom: 8px
+    }
+
+    .inpfield {
+      width: 100%;
+      height: 52px;
+      background: var(--surface2);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 0 18px;
+      color: var(--white);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      outline: none;
+      transition: all .2s
+    }
+
+    .inpfield:focus {
+      border-color: var(--neon);
+      box-shadow: 0 0 16px rgba(204, 255, 0, .08)
+    }
+
+    .inpfield.mono {
+      letter-spacing: 6px;
+      font-size: 18px;
+      text-transform: uppercase
+    }
+
+    .tonegrid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 18px
+    }
+
+    .tonebtn {
+      background: var(--surface2);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 6px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      font-family: 'Montserrat', sans-serif;
+      transition: all .2s
+    }
+
+    .toneemoji {
+      font-size: 24px;
+      display: block;
+      margin-bottom: 6px
+    }
+
+    .tonebtn.on {
+      border-color: var(--neon);
+      color: var(--neon);
+      background: rgba(204, 255, 0, .04)
+    }
+
+    .toast {
+      position: fixed;
+      top: -80px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 32px);
+      max-width: 400px;
+      background: var(--neon);
+      color: var(--black);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 12px;
+      letter-spacing: 2.5px;
+      text-align: center;
+      text-transform: uppercase;
+      padding: 18px 20px;
+      z-index: 1100;
+      transition: top .5s var(--ease-spring);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(204, 255, 0, .3)
+    }
+
+    .toast.show {
+      top: 56px
+    }
+
+    .confetti-container {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 998;
+      overflow: hidden
+    }
+
+    .confetti {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      animation: confettiFall 1.5s ease-in forwards
+    }
+
+    @keyframes confettiFall {
+      0% {
+        transform: translateY(-10px) rotate(0deg) scale(1);
+        opacity: 1
+      }
+
+      100% {
+        transform: translateY(100vh) rotate(720deg) scale(0);
+        opacity: 0
+      }
+    }
+
+    .fade-up {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: all .5s var(--ease-out-expo)
+    }
+
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0)
+    }
+
+    #resenha,
+    #tabela,
+    #perfil,
+    #notificacoes,
+    #configgrupo {
+      padding-bottom: 100px
+    }
+
+    #jogar {
+      padding-bottom: 0
+    }
+
+    .schedcard {
+      margin: 0 20px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px
+    }
+
+    .savs {
+      display: flex
+    }
+
+    .sav {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 10px;
+      border: 2px solid var(--black);
+      flex-shrink: 0;
+      font-family: 'Montserrat', sans-serif
+    }
+
+    .sav:last-child {
+      margin-left: -8px
+    }
+
+    .sinfo {
+      flex: 1
+    }
+
+    .snames {
+      font-weight: 700;
+      font-size: 13px
+    }
+
+    .stime2 {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 3px
+    }
+
+    .configrow {
+      margin: 0 20px 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between
+    }
+
+    .configlabel {
+      font-size: 13px;
+      font-weight: 600
+    }
+
+    .toggle {
+      width: 40px;
+      height: 22px;
+      border-radius: 11px;
+      position: relative;
+      cursor: pointer;
+      transition: background .2s
+    }
+
+    .toggle.on {
+      background: var(--neon)
+    }
+
+    .toggle.off {
+      background: var(--border)
+    }
+
+    .toggle-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      position: absolute;
+      top: 3px;
+      transition: all .2s
+    }
+
+    .toggle.on .toggle-dot {
+      background: var(--black);
+      right: 3px
+    }
+
+    .toggle.off .toggle-dot {
+      background: var(--muted);
+      left: 3px
+    }
+
+    .memberrow {
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, .04)
+    }
+
+    .memberav {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 12px;
+      flex-shrink: 0
+    }
+
+    .membername {
+      flex: 1;
+      font-weight: 700;
+      font-size: 14px
+    }
+
+    .memberrole {
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-family: 'Montserrat', sans-serif
+    }
+
+    .mprim {
+      margin: 0 20px 12px;
+      background: linear-gradient(145deg, rgba(204, 255, 0, .05), rgba(204, 255, 0, .01));
+      border: 1.5px solid rgba(204, 255, 0, .2);
+      border-radius: var(--r);
+      padding: 20px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all .2s var(--ease-smooth)
+    }
+
+    .mprim:active {
+      transform: scale(.98)
+    }
+
+    .mfiretag {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: var(--neon);
+      color: var(--black);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 8px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 0 var(--r) 0 12px
+    }
+
+    .mcat {
+      font-size: 9px;
+      letter-spacing: 4px;
+      color: var(--neon);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-family: 'Montserrat', sans-serif;
+      margin-bottom: 8px
+    }
+
+    .mtitle {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 24px;
+      text-transform: uppercase;
+      letter-spacing: -1px;
+      line-height: 1;
+      margin-bottom: 12px;
+      padding-right: 80px
+    }
+
+    .mpills {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 14px
+    }
+
+    .mpill {
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--mid);
+      display: flex;
+      align-items: center;
+      gap: 4px
+    }
+
+    .mrules {
+      list-style: none
+    }
+
+    .mrules li {
+      font-size: 12px;
+      color: var(--mid);
+      padding: 4px 0;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      line-height: 1.5
+    }
+
+    .mrules li::before {
+      content: '→';
+      color: var(--neon);
+      font-weight: 800;
+      flex-shrink: 0
+    }
+
+    .bonustag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      background: rgba(204, 255, 0, .08);
+      border: 1px solid rgba(204, 255, 0, .2);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--neon);
+      font-family: 'Montserrat', sans-serif;
+      letter-spacing: 1px
+    }
+
+    .mcard {
+      margin: 0 20px 10px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: var(--r);
+      padding: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all .25s var(--ease-smooth)
+    }
+
+    .mcard:active {
+      transform: scale(.97)
+    }
+
+    .mcard.on {
+      border-color: var(--neon);
+      background: rgba(204, 255, 0, .02)
+    }
+
+    .micon {
+      width: 52px;
+      height: 52px;
+      background: var(--surface2);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0
+    }
+
+    .mcname {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: .3px;
+      margin-bottom: 3px
+    }
+
+    .mcdesc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4
+    }
+
+    .mcheck {
+      width: 28px;
+      height: 28px;
+      border: 2px solid var(--border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all .25s var(--ease-spring);
+      font-size: 12px;
+      font-weight: 900;
+      color: transparent
+    }
+
+    .mcard.on .mcheck {
+      background: var(--neon);
+      border-color: var(--neon);
+      color: var(--black);
+      transform: scale(1.1)
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="phone" id="app">
+    <!-- ══ 01: SPLASH ══ -->
+    <div class="screen active" id="splash">
+      <div class="splash-bg">
+        <div class="sglow"></div>
+        <div class="sglow2"></div>
+      </div>
+      <div class="sinner" style="flex:1;justify-content:center;">
+        <div class="sbrand">
+          <div class="splash-ball">
+            <div class="splash-ball-inner">
+              <div class="splash-ball-seam"></div>
+            </div>
+          </div>
+          <div style="text-align:center;">
+            <div class="sword">ACE</div>
+            <div class="ssub">Tênis Competitivo</div>
+          </div>
+        </div>
+        <p class="stag">Amassando os amigos,<br>um ace de cada vez.</p>
+        <button class="btn-wa" onclick="doLogin(event)" style="margin-bottom:10px;">📱 Entrar com WhatsApp</button>
+        <button class="btn-ghost" style="margin-bottom:14px;" onclick="doLogin(event)">📞 Entrar com Telefone</button>
+        <div style="text-align:center;color:var(--muted);font-size:12px;margin-bottom:14px;">OU</div>
+        <button
+          style="width:100%;height:52px;background:var(--white);border:none;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:12px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--black);cursor:pointer;"
+          onclick="doLogin(event)">🔵 Entrar com Google</button>
+        <p style="font-size:11px;color:var(--muted);text-align:center;line-height:1.6;margin-top:36px;">Liga privada ·
+          Apenas amigos 🎾</p>
+      </div>
+    </div>
+
+    <!-- ══ 02: CRIAR OU ENTRAR ══ -->
+    <div class="screen" id="criarentrar">
+      <div class="topbar">
+        <div class="tlogo">
+          <div class="ball-mini"></div><span class="n">ACE</span>
+        </div>
+        <div style="width:38px;"></div>
+      </div>
+      <div
+        style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 30px;">
+        <div style="font-size:48px;margin-bottom:12px;">🎾</div>
+        <div
+          style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:28px;text-transform:uppercase;text-align:center;letter-spacing:-1px;margin-bottom:6px;">
+          Pronto pra<br><span style="color:var(--neon);">jogar?</span></div>
+        <div style="font-size:14px;color:var(--muted);text-align:center;margin-bottom:32px;">Crie seu grupo ou
+          entre<br>em um que já existe.</div>
+        <div style="width:100%;max-width:300px;">
+          <button class="btn-neon" onclick="goTo('setupgrupo')" style="margin-bottom:12px;">🏆 Criar Grupo</button>
+          <button class="btn-ghost" onclick="showModal('joinmodal')">Tenho um código de convite</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 03: SETUP DO GRUPO ══ -->
+    <div class="screen" id="setupgrupo">
+      <div class="topbar">
+        <div class="backbtn" onclick="goTo('criarentrar')">←</div>
+        <div class="ttitle">Criar Grupo</div>
+        <div style="width:38px;"></div>
+      </div>
+      <div class="ptitle" style="padding-bottom:14px;">Monte sua<br><span class="n">arena 🏟️</span></div>
+      <div style="padding:0 20px;flex:1;display:flex;flex-direction:column;">
+        <div class="inpblock"><label class="inplabel">Nome do grupo</label><input class="inpfield" type="text"
+            placeholder="Ex: Clube dos Coxos"></div>
+        <div class="inpblock"><label class="inplabel">Emoji do grupo</label>
+          <div style="display:flex;gap:8px;">
+            <div class="emoji-opt" onclick="pickEmoji(this)"
+              style="width:48px;height:48px;border-radius:12px;border:2px solid var(--neon);background:rgba(204,255,0,.04);display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;">
+              🎾</div>
+            <div class="emoji-opt" onclick="pickEmoji(this)"
+              style="width:48px;height:48px;border-radius:12px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;">
+              🏆</div>
+            <div class="emoji-opt" onclick="pickEmoji(this)"
+              style="width:48px;height:48px;border-radius:12px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;">
+              ⚡</div>
+            <div class="emoji-opt" onclick="pickEmoji(this)"
+              style="width:48px;height:48px;border-radius:12px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;">
+              🔥</div>
+            <div class="emoji-opt" onclick="pickEmoji(this)"
+              style="width:48px;height:48px;border-radius:12px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;">
+              💀</div>
+            <div class="emoji-opt" onclick="pickEmoji(this)"
+              style="width:48px;height:48px;border-radius:12px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;">
+              🦁</div>
+          </div>
+        </div>
+        <div class="inpblock"><label class="inplabel">Ranking reseta</label>
+          <div class="segtrack">
+            <div class="segbtn on" onclick="pickSeg(this)">Semanal</div>
+            <div class="segbtn" onclick="pickSeg(this)">Mensal</div>
+          </div>
+        </div>
+        <div style="margin-top:auto;padding-bottom:40px;"><button class="btn-neon" onclick="goTo('resenha')">🏟️ Criar
+            Arena</button></div>
+      </div>
+    </div>
+
+    <!-- ══ 04: HOME · RESENHA ══ -->
+    <div class="screen" id="resenha">
+      <div class="topbar">
+        <div class="tlogo">
+          <div class="ball-mini"></div><span class="n">ACE</span>
+        </div>
+        <div class="tactions">
+          <div class="ibtn" onclick="goTo('notificacoes')">🔔</div>
+          <div class="ibtn" onclick="goTo('perfil')">👤</div>
+        </div>
+      </div>
+      <div class="hband">
+        <div class="havwrap">
+          <div class="hav">CA</div>
+          <div class="hbadge">MVP 🌟</div>
+        </div>
+        <div class="hgreet">E AÍ, CAMPEÃO?</div>
+        <div class="hsub">Pronto pra mais uma?</div>
+      </div>
+      <div class="ctamain" onclick="goTo('jogar')">
+        <div class="cta-icon">🎾</div>
+        <div class="cta-text">Registrar Treinasso</div>
+        <div class="cta-sub">Compete · Pontue · Suba no Ranking</div>
+      </div>
+      <div class="srow">
+        <div class="scard">
+          <div class="slabel">Ranking</div>
+          <div class="sval">2°</div>
+          <div class="ssub2 up">↑ +8 pts hoje</div>
+        </div>
+        <div class="scard">
+          <div class="slabel">Pontos</div>
+          <div class="sval">47</div>
+          <div class="ssub2 neu">Semana 3</div>
+        </div>
+      </div>
+      <div class="fhdr">
+        <div class="ftitle">🔥 Drill da Semana</div>
+      </div>
+      <div class="drillcard" onclick="goTo('drilldetail')">
+        <div class="drillico">🎰</div>
+        <div class="drillinfo">
+          <div class="drillname">Roleta Russa</div>
+          <div class="drilldesc">Sorteio antes de cada ponto</div>
+        </div>
+        <div class="drillbonus">+2 PTS</div>
+      </div>
+      <div class="fhdr">
+        <div class="ftitle">💬 Últimas do Grupo</div>
+        <div class="fall">Ver tudo</div>
+      </div>
+      <div class="fcard">
+        <div class="fctop">
+          <div class="fav" style="background:linear-gradient(135deg,#FFD700,#FF8F00);color:#000;">RM</div>
+          <div class="fmeta">
+            <div class="fname">Deco</div>
+            <div class="ftime">Há 20 min · Quadra 3</div>
+          </div>
+          <div class="fchip">6·0 · 6·1</div>
+        </div>
+        <div class="fbody"><strong>@Guga</strong> levou um pneu hoje! 🥐 Tmj! 😆</div>
+        <div class="freact">
+          <div class="rbtn" onclick="reactBtn(this)">👍 BOA!</div>
+          <div class="rbtn" onclick="reactBtn(this)">😤 FALTOU RAÇA</div>
+        </div>
+      </div>
+      <div class="schedcard">
+        <div class="savs">
+          <div class="sav" style="background:linear-gradient(135deg,#B388FF,#4527A0);color:#fff;">AN</div>
+          <div class="sav" style="background:linear-gradient(135deg,#FF6E40,#BF360C);color:#fff;">PE</div>
+        </div>
+        <div class="sinfo">
+          <div class="snames">Ana vs Pedro</div>
+          <div class="stime2">Agendado amanhã, 19h</div>
+        </div>
+        <div style="font-size:16px;">📅</div>
+      </div>
+      <div class="fcard">
+        <div class="fctop">
+          <div class="fav" style="background:var(--neon);color:#000;">CA</div>
+          <div class="fmeta">
+            <div class="fname">Carlos A.</div>
+            <div class="ftime">Ontem · Quadra 1</div>
+          </div>
+          <div class="fchip">7·5</div>
+        </div>
+        <div class="fbody">Missão <strong>"Dominador do Cruzado"</strong> concluída. 💪</div>
+        <div class="freact">
+          <div class="rbtn" onclick="reactBtn(this)">🔥 DEMOROU!</div>
+          <div class="rbtn" onclick="reactBtn(this)">🫡 RESPEITA</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 05: TABELA ══ -->
+    <div class="screen" id="tabela">
+      <div class="topbar">
+        <div class="tlogo">
+          <div class="ball-mini"></div><span class="n">ACE</span>
+        </div>
+        <div class="ibtn" onclick="goTo('configgrupo')">⚙️</div>
+      </div>
+      <div class="rhero">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+          <div
+            style="width:7px;height:7px;background:var(--neon);border-radius:50%;box-shadow:0 0 8px var(--neon-glow);">
+          </div>
+          <div style="font-size:13px;font-weight:600;color:var(--mid);">Clube dos Coxos</div>
+          <div
+            style="margin-left:auto;background:rgba(204,255,0,.06);border:1px solid rgba(204,255,0,.15);border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;color:var(--neon);font-family:'Montserrat',sans-serif;"
+            id="timer">4d 12h</div>
+        </div>
+        <div class="mpc">
+          <div class="mpnum">2°</div>
+          <div class="mpinfo">
+            <div class="nm">Carlos Augusto</div>
+            <div class="dt">5 jogos · 3V 2D · você</div>
+          </div>
+          <div class="mppts">
+            <div class="num">47</div><span>pts</span>
+          </div>
+        </div>
+      </div>
+      <div class="chiprow">
+        <div class="chipbtn on" onclick="pickChip(this)">Semanal</div>
+        <div class="chipbtn" onclick="pickChip(this)">Geral</div>
+      </div>
+      <div class="podium">
+        <div class="pod-col">
+          <div class="pod-av" style="width:48px;height:48px;font-size:14px;background:#2979FF;color:#fff;">LP</div>
+          <div class="pod-name">Lucas</div>
+          <div class="pod-bar" style="height:50px;"><span class="pod-pos"
+              style="font-size:16px;color:#CD7F32;">3°</span></div>
+        </div>
+        <div class="pod-col">
+          <div style="font-size:16px;text-align:center;">🏆</div>
+          <div class="pod-av"
+            style="width:56px;height:56px;font-size:16px;background:linear-gradient(135deg,#FFD700,#FF8F00);color:#000;border:2px solid rgba(255,215,0,.4);">
+            RM</div>
+          <div class="pod-name">Rafael</div>
+          <div class="pod-bar" style="height:70px;border-color:rgba(255,215,0,.3);"><span class="pod-pos"
+              style="font-size:18px;color:var(--gold);">1°</span></div>
+        </div>
+        <div class="pod-col">
+          <div class="pod-av" style="width:48px;height:48px;font-size:14px;background:var(--neon);color:#000;">CA</div>
+          <div class="pod-name">Carlos</div>
+          <div class="pod-bar" style="height:58px;"><span class="pod-pos"
+              style="font-size:16px;color:var(--mid);">2°</span></div>
+        </div>
+      </div>
+      <div class="rlist">
+        <div class="rltitle">Ranking Semanal</div>
+        <div class="rrow">
+          <div class="rpos g">1</div>
+          <div class="rav" style="background:linear-gradient(135deg,#FFD700,#FF8F00);color:#000;">RM<div class="ravb">🏆
+            </div>
+          </div>
+          <div class="rinfo">
+            <div class="rname">Rafael Moura</div>
+            <div class="rsub n">🏆 CAMPEÃO DA SEMANA</div>
+          </div>
+          <div class="rpts">58</div>
+        </div>
+        <div class="rrow me">
+          <div class="rpos s">2</div>
+          <div class="rav" style="background:var(--neon);color:#000;">CA</div>
+          <div class="rinfo">
+            <div class="rname">Carlos Augusto ← você</div>
+            <div class="rsub">5 jogos · 3V 2D</div>
+          </div>
+          <div class="rpts">47</div>
+        </div>
+        <div class="rrow">
+          <div class="rpos b">3</div>
+          <div class="rav" style="background:#2979FF;color:#fff;">LP</div>
+          <div class="rinfo">
+            <div class="rname">Lucas Pinheiro</div>
+            <div class="rsub">2 jogos</div>
+          </div>
+          <div class="rpts">41</div>
+        </div>
+        <div class="rrow">
+          <div class="rpos" style="color:var(--mid);">4</div>
+          <div class="rav" style="background:#FF6E40;color:#fff;">MF</div>
+          <div class="rinfo">
+            <div class="rname">Marcos Figueiredo</div>
+            <div class="rsub">2 jogos</div>
+          </div>
+          <div class="rpts">35</div>
+        </div>
+        <div class="rrow">
+          <div class="rpos" style="color:var(--mid);">5</div>
+          <div class="rav" style="background:#B388FF;color:#fff;">GS</div>
+          <div class="rinfo">
+            <div class="rname">Gabriel Silva</div>
+            <div class="rsub">1 jogo</div>
+          </div>
+          <div class="rpts">22</div>
+        </div>
+        <div class="rrow">
+          <div class="rpos r">6</div>
+          <div class="rav" style="background:#546E7A;color:#fff;">JP<div class="ravb">🏮</div>
+          </div>
+          <div class="rinfo">
+            <div class="rname">João Pedro</div>
+            <div class="rsub r2">🏮 GUARDIÃO DA LANTERNA</div>
+          </div>
+          <div class="rpts" style="color:var(--red);">8</div>
+        </div>
+      </div>
+      <div class="invrow">
+        <div class="invlabel">📨 Código do grupo</div>
+        <div class="invcode">ACE24</div>
+      </div>
+    </div>
+
+    <!-- ══ 06+07: JOGAR ══ -->
+    <div class="screen" id="jogar">
+      <div class="topbar">
+        <div class="tlogo">
+          <div class="ball-mini"></div><span class="n">ACE</span>
+        </div>
+        <div class="tactions">
+          <div class="ibtn">🔔</div>
+          <div class="ibtn" onclick="goTo('perfil')">👤</div>
+        </div>
+      </div>
+      <div class="ptitle">BORA<br><span class="n">PRO PLAY?</span></div>
+      <div class="drillcard" style="border-color:var(--border);">
+        <div class="drillico">📅</div>
+        <div class="drillinfo">
+          <div class="drillname">Agendar Jogo</div>
+          <div class="drilldesc">Marque data/hora e avise pelo WhatsApp</div>
+        </div>
+        <div style="color:var(--muted);">▼</div>
+      </div>
+      <div class="seye">Jogo Principal</div>
+      <div class="drillcard" onclick="goTo('log')" style="border-color:rgba(204,255,0,.3);">
+        <div class="drillico" style="border:2px solid var(--neon);">🎾</div>
+        <div class="drillinfo">
+          <div class="drillname" style="color:var(--neon);">Set Normal</div>
+          <div class="drilldesc">Jogo livre · Registrar resultado</div>
+          <div style="display:flex;gap:4px;margin-top:4px;"><span
+              style="font-size:9px;color:var(--muted);background:var(--surface2);padding:2px 6px;border-radius:4px;">⏱
+              60 min</span><span
+              style="font-size:9px;color:var(--gold);background:rgba(255,215,0,.06);padding:2px 6px;border-radius:4px;">🏆
+              Vale pontos</span></div>
+        </div>
+        <div style="color:var(--neon);">→</div>
+      </div>
+      <div
+        style="text-align:center;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:8px 0;">
+        Ou tente algo diferente</div>
+      <div class="seye">🎯 Drills Situacionais</div>
+      <div class="drillcard" onclick="goTo('drilldetail')">
+        <div class="drillico">⚡</div>
+        <div class="drillinfo">
+          <div class="drillname">O Sniper do Saque</div>
+          <div class="drilldesc">Saque preciso + ataque mortal</div>
+        </div>
+      </div>
+      <div class="drillcard" onclick="goTo('drilldetail')">
+        <div class="drillico">👑</div>
+        <div class="drillinfo">
+          <div class="drillname">Rei do Winner</div>
+          <div class="drilldesc">Winner limpo vale x3</div>
+        </div>
+      </div>
+      <div class="drillcard" onclick="goTo('drilldetail')">
+        <div class="drillico">💀</div>
+        <div class="drillinfo">
+          <div class="drillname">Tie-Break da Morte</div>
+          <div class="drilldesc">Começa no 4×4. Pressão total</div>
+        </div>
+      </div>
+      <div class="drillcard" onclick="goTo('drilldetail')">
+        <div class="drillico">⚔️</div>
+        <div class="drillinfo">
+          <div class="drillname">Guerra de Trincheira</div>
+          <div class="drilldesc">Só slice e deixadinha</div>
+        </div>
+      </div>
+      <div style="height:120px;"></div>
+    </div>
+
+    <!-- ══ 08: DRILL DETAIL ══ -->
+    <div class="screen" id="drilldetail">
+      <div class="topbar">
+        <div class="backbtn" onclick="goTo('jogar')">←</div>
+        <div class="ttitle">Regras da Arena</div>
+        <div style="width:38px;"></div>
+      </div>
+      <div class="ptitle" style="padding-bottom:14px;">REGRAS<br><span class="n">DA ARENA ⚔️</span></div>
+      <div class="mprim" onclick="goTo('log')">
+        <div class="mfiretag">🔥 PRINCIPAL</div>
+        <div class="mcat">⚡ Saque + Um</div>
+        <div class="mtitle">O SNIPER DO SAQUE</div>
+        <div class="mpills">
+          <div class="mpill">⏱ 10 min</div>
+          <div class="mpill">🎯 2 zonas</div>
+          <div class="mpill">15 pts</div>
+        </div>
+        <ul class="mrules">
+          <li>Saque direcionado para zona T ou Wide</li>
+          <li>Segunda bola deve ser ataque pós-saque</li>
+          <li>Ponto válido só seguindo o padrão</li>
+          <li>Vence quem completar 15 pontos</li>
+        </ul>
+        <div class="bonustag">⭐ +2 PTS BÔNUS ESTA SEMANA</div>
+      </div>
+      <div class="mcard" onclick="selMissao(this)">
+        <div class="micon">👑</div>
+        <div style="flex:1">
+          <div class="mcname">Rei do Winner</div>
+          <div class="mcdesc">Winner vale x3 pontos.</div>
+        </div>
+        <div class="mcheck">✓</div>
+      </div>
+      <div class="mcard" onclick="selMissao(this)">
+        <div class="micon">💀</div>
+        <div style="flex:1">
+          <div class="mcname">Tie-Break da Morte</div>
+          <div class="mcdesc">Começa no 4 a 4.</div>
+        </div>
+        <div class="mcheck">✓</div>
+      </div>
+      <div style="height:16px;"></div>
+      <div class="bsticky"><button class="btn-neon" onclick="goTo('log')">BORA PRO PLAY 🔥</button></div>
+    </div>
+
+    <!-- ══ 09+10: LOG/RESULTADO ══ -->
+    <div class="screen" id="log">
+      <div class="topbar">
+        <div class="backbtn" onclick="goTo('jogar')">←</div>
+        <div class="ttitle">Resultado</div>
+        <div style="width:38px;"></div>
+      </div>
+      <div class="ptitle" style="padding-bottom:14px;">REGISTRAR<br><span class="n">RESULTADO</span></div>
+      <div class="stephead">1. Escolha o rival</div>
+      <div class="galscroll" style="margin-bottom:20px;">
+        <div class="galitem" onclick="pickRival(this,'RM','Rafael M.','linear-gradient(135deg,#FFD700,#FF8F00)','000')">
+          <div class="galav" style="background:linear-gradient(135deg,#FFD700,#FF8F00);color:#000;">RM</div>
+          <div class="galname">Rafael</div>
+        </div>
+        <div class="galitem" onclick="pickRival(this,'LP','Lucas P.','linear-gradient(135deg,#2979FF,#0D47A1)','fff')">
+          <div class="galav" style="background:linear-gradient(135deg,#2979FF,#0D47A1);color:#fff;">LP</div>
+          <div class="galname">Lucas</div>
+        </div>
+        <div class="galitem" onclick="pickRival(this,'MF','Marcos F.','linear-gradient(135deg,#FF6E40,#BF360C)','fff')">
+          <div class="galav" style="background:linear-gradient(135deg,#FF6E40,#BF360C);color:#fff;">MF</div>
+          <div class="galname">Marcos</div>
+        </div>
+        <div class="galitem"
+          onclick="pickRival(this,'GS','Gabriel S.','linear-gradient(135deg,#B388FF,#4527A0)','fff')">
+          <div class="galav" style="background:linear-gradient(135deg,#B388FF,#4527A0);color:#fff;">GS</div>
+          <div class="galname">Gabriel</div>
+        </div>
+        <div class="galitem" onclick="pickRival(this,'JP','João P.','linear-gradient(135deg,#546E7A,#263238)','fff')">
+          <div class="galav" style="background:linear-gradient(135deg,#546E7A,#263238);color:#fff;">JP</div>
+          <div class="galname">João</div>
+        </div>
+      </div>
+      <div class="logvs" id="vs-display" style="display:none;">
+        <div class="logp">
+          <div class="logav" style="background:var(--neon);color:#000;border-color:var(--neon);">CA</div>
+          <div class="logpname">Carlos A.</div>
+          <div class="logyou">VOCÊ</div>
+        </div>
+        <div class="logvssep">VS</div>
+        <div class="logp">
+          <div class="logav" id="log-riv-av">--</div>
+          <div class="logpname" id="log-riv-name">Rival</div>
+        </div>
+      </div>
+      <div class="stephead">2. Quem Ganhou?</div>
+      <div class="wgrid">
+        <div class="wcard" onclick="pickW(this,'me')">
+          <div class="wcav" style="background:var(--neon);color:#000;">CA</div>
+          <div class="wcname">Carlos A.</div>
+          <div class="wcyou">você</div>
+        </div>
+        <div class="wcard" onclick="pickW(this,'rival')">
+          <div class="wcav" id="log-w-av" style="background:var(--surface2);color:var(--muted);">?</div>
+          <div class="wcname" id="log-w-name">Rival</div>
+        </div>
+      </div>
+      <div class="stephead">3. Placar</div>
+      <div class="sgrid">
+        <div class="sbtn2" onclick="pickSc(this,'6×0')">6×0</div>
+        <div class="sbtn2" onclick="pickSc(this,'6×1')">6×1</div>
+        <div class="sbtn2" onclick="pickSc(this,'6×2')">6×2</div>
+        <div class="sbtn2" onclick="pickSc(this,'6×3')">6×3</div>
+        <div class="sbtn2" onclick="pickSc(this,'6×4')">6×4</div>
+        <div class="sbtn2" onclick="pickSc(this,'7×5')">7×5</div>
+        <div class="sbtn2" onclick="pickSc(this,'7×6')">7×6</div>
+      </div>
+      <div class="stephead">4. MVP do Jogo (opcional)</div>
+      <div class="mvpscroll">
+        <div class="mvpchip on" onclick="pickMVP(this,'none')" style="border-color:var(--border);color:var(--mid);">Sem
+          MVP</div>
+        <div class="mvpchip" onclick="pickMVP(this,'CA')">
+          <div class="mvpav" style="background:var(--neon);color:#000;">CA</div>Carlos A.
+        </div>
+        <div class="mvpchip" onclick="pickMVP(this,'RM')">
+          <div class="mvpav" id="mvp-riv-av" style="background:var(--surface2);color:var(--muted);">?</div><span
+            id="mvp-riv-name">Rival</span>
+        </div>
+      </div>
+      <div class="ptsprev">
+        <div class="ptschip">✓ Participação +4</div>
+        <div class="ptschip" id="pts-win" style="display:none;">🏆 Vitória +6</div>
+        <div class="ptschip" id="pts-mvp" style="display:none;">⭐ MVP +2</div>
+        <div class="ptschip" id="pts-bonus">⏱ Bônus 60min (×1.25)</div>
+      </div>
+      <div class="bwrap"><button class="btn-neon" id="save-btn" onclick="saveResult()" disabled>SALVAR
+          RESULTADO</button></div>
+      <div style="height:20px;"></div>
+    </div>
+
+    <!-- ══ 11: CELEBRAÇÃO ══ -->
+    <div class="screen celebscreen" id="celebracao">
+      <div class="celeb-glow"></div>
+      <div class="celeb-inner">
+        <div class="celeb-emoji">🏆</div>
+        <div class="celeb-title">VITÓRIA!</div>
+        <div class="celeb-pts">+12.5 PONTOS NO RANKING</div>
+        <div class="celeb-score" id="celeb-score">6×4</div>
+        <div class="celeb-sub">Carlos A. venceu <span id="celeb-rival">Rafael M.</span></div>
+        <div class="celeb-rank">
+          <div class="celeb-rank-col">
+            <div class="celeb-rank-label">Antes</div>
+            <div class="celeb-rank-val">3°</div>
+          </div>
+          <div class="celeb-rank-arr">→</div>
+          <div class="celeb-rank-col">
+            <div class="celeb-rank-label" style="color:var(--neon);">Agora</div>
+            <div class="celeb-rank-val" style="color:var(--neon);">2°</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;width:220px;">
+          <button class="btn-neon" onclick="goTo('share')">📤 COMPARTILHAR</button>
+          <button class="btn-ghost" onclick="goTo('resenha')">Voltar à Arena</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 12: SHARE CARD ══ -->
+    <div class="screen" id="share">
+      <div class="topbar">
+        <div class="tlogo">
+          <div class="ball-mini"></div><span class="n">ACE</span>
+        </div>
+      </div>
+      <div class="ptitle" style="padding-bottom:14px;">COMPARTI-<br>LHE <span class="n">🏆</span></div>
+      <div class="shcard">
+        <div class="schdr">
+          <div>
+            <div class="sclogo"><span class="n">ACE</span></div>
+            <div
+              style="font-size:8px;letter-spacing:4px;color:var(--muted);text-transform:uppercase;font-family:'Montserrat',sans-serif;font-weight:700;">
+              Tênis Competitivo</div>
+          </div>
+          <div style="text-align:right;font-size:10px;color:var(--muted);">Grupo<strong
+              style="display:block;color:var(--white);font-size:13px;">Clube dos Coxos</strong></div>
+        </div>
+        <div class="scres">
+          <div class="scmtag">⚡ O Sniper do Saque</div>
+          <div class="scvsrow">
+            <div class="scplayer">
+              <div class="scav" style="background:var(--neon);color:#000;">CA</div>
+              <div class="scpname">Carlos A.</div>
+              <div class="scwin">🏆 VENCEDOR</div>
+            </div>
+            <div class="scscorebig" id="share-score">6×2</div>
+            <div class="scplayer">
+              <div class="scav dim" style="background:#333;">RM</div>
+              <div class="scpname" style="opacity:.5;">Rafael M.</div>
+            </div>
+          </div>
+        </div>
+        <div class="sctop3">
+          <div class="sct3title">Top 3 Atualizado</div>
+          <div class="scrrow">
+            <div class="scrn" style="color:var(--gold);">1</div>
+            <div class="scrav" style="background:linear-gradient(135deg,#FFD700,#FF8F00);color:#000;">RM</div>
+            <div class="scrname">Rafael Moura</div>
+            <div class="scrpts">58</div>
+          </div>
+          <div class="scrrow">
+            <div class="scrn" style="color:#C0C0C0;">2</div>
+            <div class="scrav" style="background:var(--neon);color:#000;">CA</div>
+            <div class="scrname" style="color:var(--neon);">Carlos A. ←</div>
+            <div class="scrpts">52</div>
+          </div>
+          <div class="scrrow">
+            <div class="scrn" style="color:#CD7F32;">3</div>
+            <div class="scrav" style="background:#2979FF;color:#fff;">LP</div>
+            <div class="scrname" style="opacity:.6;">Lucas Pinheiro</div>
+            <div class="scrpts">41</div>
+          </div>
+        </div>
+        <div class="scbadges">
+          <div class="scbadge gold"><span class="scbemoji">🏆</span>
+            <div class="scblabel">Campeão</div>
+            <div class="scbplayer">Rafael M.</div>
+          </div>
+          <div class="scbadge red"><span class="scbemoji">🏮</span>
+            <div class="scblabel">Lanterna</div>
+            <div class="scbplayer">João P.</div>
+          </div>
+        </div>
+        <div class="scinvite"><span class="sccode">ACE24</span><span class="schint">entre no grupo · ace app</span>
+        </div>
+      </div>
+      <div style="padding:0 16px;"><button class="btn-wa" onclick="doShare()" style="margin-bottom:12px;">📱 ENVIAR
+          IMAGEM</button></div>
+      <div style="padding:0 16px 12px;"><button class="btn-ghost">📥 Salvar Imagem na Galeria</button></div>
+      <div style="padding:0 16px 28px;"><button class="btn-ghost" onclick="goTo('resenha')">← VOLTAR PRA ARENA</button>
+      </div>
+    </div>
+
+    <!-- ══ 14: PERFIL ══ -->
+    <div class="screen" id="perfil">
+      <div class="topbar">
+        <div class="backbtn" onclick="goTo('resenha')">←</div>
+        <div class="tlogo">
+          <div class="ball-mini"></div><span class="n">ACE</span>
+        </div>
+        <div class="ibtn" onclick="goTo('configgrupo')">⚙️</div>
+      </div>
+      <div class="profhero">
+        <div class="profavwrap">
+          <div class="profav">CA</div>
+          <div class="profbadge">MVP 🌟</div>
+        </div>
+        <div class="profname">Carlos Augusto</div>
+        <div style="font-size:10px;color:var(--neon);font-weight:800;letter-spacing:2px;">Clube dos Coxos</div>
+      </div>
+      <div class="profstats">
+        <div class="profstat">
+          <div class="pstatval">14</div>
+          <div class="pstatlabel">Vitórias</div>
+        </div>
+        <div class="profstat">
+          <div class="pstatval">6</div>
+          <div class="pstatlabel">Derrotas</div>
+        </div>
+        <div class="profstat">
+          <div class="pstatval" style="color:var(--neon);">70%</div>
+          <div class="pstatlabel">Win Rate</div>
+        </div>
+        <div class="profstat">
+          <div class="pstatval" style="color:var(--gold);">1°</div>
+          <div class="pstatlabel">Melhor Ranking</div>
+        </div>
+      </div>
+      <div class="seye">Últimas Partidas</div>
+      <div class="histitem">
+        <div class="histvd v">V</div>
+        <div class="histinfo">vs Rafael M.</div>
+        <div class="histscore">6×2</div>
+      </div>
+      <div class="histitem">
+        <div class="histvd d">D</div>
+        <div class="histinfo">vs Lucas P.</div>
+        <div class="histscore">4×6</div>
+      </div>
+      <div class="histitem">
+        <div class="histvd v">V</div>
+        <div class="histinfo">vs João P.</div>
+        <div class="histscore">6×0</div>
+      </div>
+      <div class="histitem">
+        <div class="histvd v">V</div>
+        <div class="histinfo">vs Marcos F.</div>
+        <div class="histscore">7×5</div>
+      </div>
+      <div style="padding:20px 20px 8px;">
+        <button class="btn-ghost" onclick="goTo('splash')"
+          style="border-color:rgba(239,68,68,.25);color:var(--red);">SAIR DA CONTA</button>
+      </div>
+    </div>
+
+    <!-- ══ 15: NOTIFICAÇÕES ══ -->
+    <div class="screen" id="notificacoes">
+      <div class="topbar">
+        <div class="backbtn" onclick="goTo('resenha')">←</div>
+        <div class="ttitle">Alertas</div>
+        <div style="font-size:11px;color:var(--neon);font-weight:700;cursor:pointer;">Limpar</div>
+      </div>
+      <div class="ptitle" style="padding-bottom:14px;">SEUS<br><span class="n">ALERTAS 🔔</span></div>
+      <div class="notifitem neon-l">
+        <div class="notifemoji">📅</div>
+        <div>
+          <div class="notiftitle">Rafael agendou jogo amanhã 18h</div>
+          <div class="notifsub">Quadra 3 · 2 min</div>
+        </div>
+      </div>
+      <div class="notifitem gold-l">
+        <div class="notifemoji">🏆</div>
+        <div>
+          <div class="notiftitle">Você subiu para 2° lugar!</div>
+          <div class="notifsub">+12.5 pontos · 15 min</div>
+        </div>
+      </div>
+      <div class="notifitem red-l">
+        <div class="notifemoji">⏰</div>
+        <div>
+          <div class="notiftitle">O ranking zera em 2 dias!</div>
+          <div class="notifsub">Você está a 11 pts do topo · 1h</div>
+        </div>
+      </div>
+      <div class="notifitem neon-l">
+        <div class="notifemoji">⚡</div>
+        <div>
+          <div class="notiftitle">Drill da semana: Roleta Russa</div>
+          <div class="notifsub">+2 pts bônus · novo</div>
+        </div>
+      </div>
+      <div class="notifitem">
+        <div class="notifemoji">👋</div>
+        <div>
+          <div class="notiftitle">Gabriel S. entrou no grupo</div>
+          <div class="notifsub">Novo membro · ontem</div>
+        </div>
+      </div>
+      <div class="notifitem">
+        <div class="notifemoji">📊</div>
+        <div>
+          <div class="notiftitle">Resultado: Rafael 6×3 João</div>
+          <div class="notifsub">Ranking atualizado · ontem</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 16: CONFIG GRUPO ══ -->
+    <div class="screen" id="configgrupo">
+      <div class="topbar">
+        <div class="backbtn" onclick="goTo('tabela')">←</div>
+        <div class="ttitle">Grupo</div>
+        <div style="width:38px;"></div>
+      </div>
+      <div style="text-align:center;padding:20px 20px 24px;">
+        <div style="font-size:36px;">🎾</div>
+        <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:22px;text-transform:uppercase;">Clube
+          dos Coxos</div>
+        <div style="font-size:12px;color:var(--muted);">6 membros · Ranking semanal</div>
+      </div>
+      <div class="seye">Membros</div>
+      <div class="memberrow">
+        <div class="memberav" style="background:linear-gradient(135deg,#FFD700,#FF8F00);color:#000;">RM</div>
+        <div class="membername">Rafael M.</div>
+        <div class="memberrole">ADMIN</div>
+      </div>
+      <div class="memberrow">
+        <div class="memberav" style="background:var(--neon);color:#000;">CA</div>
+        <div class="membername">Carlos A.</div>
+        <div class="memberrole">ADMIN</div>
+      </div>
+      <div class="memberrow">
+        <div class="memberav" style="background:#2979FF;color:#fff;">LP</div>
+        <div class="membername">Lucas P.</div>
+        <div class="memberrole"></div>
+      </div>
+      <div class="memberrow">
+        <div class="memberav" style="background:#FF6E40;color:#fff;">MF</div>
+        <div class="membername">Marcos F.</div>
+        <div class="memberrole"></div>
+      </div>
+      <div class="memberrow">
+        <div class="memberav" style="background:#B388FF;color:#fff;">GS</div>
+        <div class="membername">Gabriel S.</div>
+        <div class="memberrole"></div>
+      </div>
+      <div class="memberrow" style="border-bottom:none;">
+        <div class="memberav" style="background:#546E7A;color:#fff;">JP</div>
+        <div class="membername">João P.</div>
+        <div class="memberrole"></div>
+      </div>
+      <div style="padding:20px;">
+        <div class="configrow">
+          <div class="configlabel">Notificações</div>
+          <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off');">
+            <div class="toggle-dot"></div>
+          </div>
+        </div>
+        <div class="configrow">
+          <div class="configlabel">Ranking público</div>
+          <div class="toggle off" onclick="this.classList.toggle('on');this.classList.toggle('off');">
+            <div class="toggle-dot"></div>
+          </div>
+        </div>
+      </div>
+      <div class="bwrap"><button class="btn-neon" onclick="goTo('convidar')">📤 CONVIDAR MEMBROS</button></div>
+    </div>
+
+    <!-- ══ 13: CONVIDAR ══ -->
+    <div class="screen" id="convidar">
+      <div class="topbar">
+        <div class="backbtn" onclick="goTo('configgrupo')">←</div>
+        <div class="ttitle">Convidar</div>
+        <div style="width:38px;"></div>
+      </div>
+      <div style="text-align:center;padding:24px 20px;">
+        <div style="font-size:48px;margin-bottom:12px;">🎾</div>
+        <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:24px;text-transform:uppercase;">Chama
+          a <span style="color:var(--neon);">galera</span></div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:24px;">Quanto mais gente, melhor o ranking</div>
+      </div>
+      <div
+        style="margin:0 20px 16px;background:var(--surface);border:1px solid rgba(204,255,0,.2);border-radius:var(--r);padding:20px;text-align:center;">
+        <div class="seglabel" style="margin-bottom:8px;">Código do Grupo</div>
+        <div
+          style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:32px;letter-spacing:8px;color:var(--neon);text-shadow:0 0 20px rgba(204,255,0,.2);">
+          ACE24</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px;">Toque para copiar</div>
+      </div>
+      <div
+        style="margin:0 20px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;text-align:center;">
+        <div class="seglabel" style="margin-bottom:8px;">QR Code</div>
+        <div
+          style="width:100px;height:100px;background:white;border-radius:8px;margin:4px auto;display:flex;align-items:center;justify-content:center;">
+          <div
+            style="width:70px;height:70px;background:repeating-conic-gradient(#09090B 0% 25%, white 0% 50%) 50% / 10px 10px;border-radius:4px;">
+          </div>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px;">Escaneie na quadra</div>
+      </div>
+      <div style="padding:0 20px;"><button class="btn-wa" style="margin-bottom:10px;">📱 Enviar no WhatsApp</button>
+      </div>
+      <div style="padding:0 20px 24px;"><button class="btn-ghost">📋 Copiar Link</button></div>
+    </div>
+
+    <!-- GLOBAL NAV -->
+    <div class="bnav" id="global-nav" style="display:none;">
+      <div class="navi">
+        <div class="ni on" data-tab="resenha" onclick="goTo('resenha')"><svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
+          </svg>Resenha</div>
+        <div class="ni" data-tab="tabela" onclick="goTo('tabela')"><svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M7 2v11h3v9l7-12h-4l4-8z" />
+          </svg>Tabela</div>
+        <div class="ni" data-tab="jogar" onclick="goTo('jogar')"><svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" />
+          </svg>Jogar</div>
+        <div class="ni" data-tab="perfil" onclick="goTo('perfil')"><svg viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+          </svg>Perfil</div>
+      </div>
+    </div>
+
+    <!-- MODAL JOIN -->
+    <div class="overlay" id="joinmodal" onclick="closeModal(event)">
+      <div class="sheet" onclick="event.stopPropagation()">
+        <div class="shandle"></div>
+        <div class="shtitle">ENTRAR NO GRUPO</div>
+        <div class="inpblock"><label class="inplabel">Código de Convite</label><input class="inpfield mono" type="text"
+            placeholder="ACE24"></div>
+        <button class="btn-neon" onclick="closeModalDirect();goTo('resenha');">ENTRAR 🏆</button>
+      </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast">🏆 RESULTADO SALVO! RANKING ATUALIZADO!</div>
+    <!-- CONFETTI -->
+    <div class="confetti-container" id="confetti"></div>
+  </div>
+
+  <script>
+    var winnerPicked = false, scorePicked = false, rivalPicked = false, currentScore = '6×2', currentRivalName = 'Rafael M.';
+    var navScreens = ['resenha', 'tabela', 'jogar', 'perfil'];
+
+    function goTo(id) {
+      var cur = document.querySelector('.screen.active');
+      if (cur) { cur.classList.remove('active'); cur.classList.add('exit-left'); setTimeout(function () { cur.classList.remove('exit-left') }, 500); }
+      var el = document.getElementById(id);
+      requestAnimationFrame(function () { el.classList.add('active'); el.scrollTop = 0; });
+      var nav = document.getElementById('global-nav');
+      if (navScreens.indexOf(id) !== -1) { nav.style.display = ''; nav.querySelectorAll('.ni').forEach(function (n) { n.classList.toggle('on', n.dataset.tab === id) }); }
+      else { nav.style.display = 'none'; }
+    }
+
+    function doLogin(e) {
+      var btn = e.target.closest('button');
+      var orig = btn.innerHTML;
+      btn.innerHTML = '<div style="width:20px;height:20px;border:2.5px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;margin:0 auto;"></div>';
+      btn.style.pointerEvents = 'none';
+      setTimeout(function () { goTo('criarentrar') }, 900);
+    }
+
+    function pickEmoji(el) {
+      document.querySelectorAll('.emoji-opt').forEach(function (e) { e.style.borderColor = 'var(--border)'; e.style.background = 'transparent'; });
+      el.style.borderColor = 'var(--neon)'; el.style.background = 'rgba(204,255,0,.04)';
+    }
+
+    function pickSeg(el) { var p = el.parentElement; p.querySelectorAll('.segbtn').forEach(function (b) { b.classList.remove('on') }); el.classList.add('on'); }
+    function pickChip(el) { var p = el.parentElement; p.querySelectorAll('.chipbtn').forEach(function (b) { b.classList.remove('on') }); el.classList.add('on'); }
+
+    function pickRival(el, ini, name, bg, tc) {
+      document.querySelectorAll('.galitem').forEach(function (i) { i.classList.remove('on') }); el.classList.add('on');
+      rivalPicked = true; currentRivalName = name;
+      document.getElementById('vs-display').style.display = 'flex';
+      var ra = document.getElementById('log-riv-av'); ra.style.background = bg; ra.textContent = ini; ra.style.color = '#' + tc; ra.style.borderColor = bg;
+      document.getElementById('log-riv-name').textContent = name;
+      var wa = document.getElementById('log-w-av'); wa.style.background = bg; wa.textContent = ini; wa.style.color = '#' + tc;
+      document.getElementById('log-w-name').textContent = name;
+      var ma = document.getElementById('mvp-riv-av'); ma.style.background = bg; ma.textContent = ini; ma.style.color = '#' + tc;
+      document.getElementById('mvp-riv-name').textContent = name;
+      checkSave();
+    }
+
+    function selMissao(el) { document.querySelectorAll('.mcard').forEach(function (c) { c.classList.remove('on') }); el.classList.add('on'); }
+
+    function pickW(el, who) {
+      document.querySelectorAll('.wcard').forEach(function (c) { c.classList.remove('on') }); el.classList.add('on');
+      winnerPicked = true; document.getElementById('pts-win').style.display = (who === 'me') ? 'flex' : 'none'; checkSave();
+    }
+
+    function pickSc(el, score) {
+      document.querySelectorAll('.sbtn2').forEach(function (b) { b.classList.remove('on') }); el.classList.add('on');
+      scorePicked = true; currentScore = score; document.getElementById('share-score').textContent = score; document.getElementById('celeb-score').textContent = score; checkSave();
+    }
+
+    function pickMVP(el, who) {
+      document.querySelectorAll('.mvpchip').forEach(function (c) { c.classList.remove('on') }); el.classList.add('on');
+      document.getElementById('pts-mvp').style.display = (who !== 'none') ? 'flex' : 'none';
+    }
+
+    function checkSave() { document.getElementById('save-btn').disabled = !(winnerPicked && scorePicked && rivalPicked); }
+
+    function saveResult() {
+      document.getElementById('celeb-rival').textContent = currentRivalName;
+      goTo('celebracao');
+      winnerPicked = false; scorePicked = false; rivalPicked = false;
+      var t = document.getElementById('toast'); t.classList.add('show'); setTimeout(function () { t.classList.remove('show') }, 3500);
+      spawnConfetti();
+    }
+
+    function spawnConfetti() {
+      var c = document.getElementById('confetti'); c.innerHTML = '';
+      var colors = ['#CCFF00', '#FFD700', '#EF4444', '#2979FF', '#B388FF', '#FAFAFA'];
+      for (var i = 0; i < 40; i++) { var p = document.createElement('div'); p.className = 'confetti'; p.style.left = Math.random() * 100 + '%'; p.style.background = colors[Math.floor(Math.random() * colors.length)]; p.style.animationDelay = (Math.random() * .8) + 's'; p.style.animationDuration = (1 + Math.random()) + 's'; p.style.width = (4 + Math.random() * 8) + 'px'; p.style.height = (4 + Math.random() * 8) + 'px'; p.style.borderRadius = Math.random() > .5 ? '50%' : '2px'; c.appendChild(p); }
+      setTimeout(function () { c.innerHTML = '' }, 3000);
+    }
+
+    function doShare() {
+      var txt = '🎾 *ACE — Tênis Competitivo*\n\n⚡ Missão: O Sniper do Saque\n📊 Carlos A. ' + currentScore + ' ' + currentRivalName + '\n\n🏆 Top 3:\n1. Rafael Moura — 58pts\n2. Carlos Augusto — 52pts ← 🔥\n3. Lucas Pinheiro — 41pts\n\n🔗 Grupo: *ACE24*\nace.app/join/ACE24';
+      window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank');
+    }
+
+    function showModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(e) { if (e.target.classList.contains('overlay')) e.target.classList.remove('open') }
+    function closeModalDirect() { document.querySelectorAll('.overlay.open').forEach(function (o) { o.classList.remove('open') }); }
+    function reactBtn(el) { if (el.style.borderColor) return; el.style.borderColor = 'var(--neon)'; el.style.color = 'var(--neon)'; el.style.background = 'rgba(204,255,0,.06)'; el.style.transform = 'scale(1.05)'; setTimeout(function () { el.style.transform = '' }, 200); }
+
+    function updateTimer() {
+      var now = new Date(), sun = new Date(); sun.setDate(sun.getDate() + (7 - sun.getDay()) % 7 || 7); sun.setHours(23, 59, 0, 0);
+      var d = Math.floor((sun - now) / 86400000), h = Math.floor(((sun - now) % 86400000) / 3600000), m = Math.floor(((sun - now) % 3600000) / 60000);
+      var el = document.getElementById('timer'); if (el) el.textContent = d + 'd ' + h + 'h ' + m + 'm';
+    }
+    updateTimer(); setInterval(updateTimer, 60000);
+    document.querySelectorAll('.btn-neon').forEach(function (btn) { btn.addEventListener('pointermove', function (e) { var r = btn.getBoundingClientRect(); btn.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%'); btn.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%'); }); });
+  </script>
+</body>
+
+</html>
