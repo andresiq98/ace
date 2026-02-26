@@ -134,7 +134,7 @@ ace.app/join/ACE24`;
                     onClick={handleShareWhatsApp}
                     className="w-full flex items-center justify-center gap-2 h-[52px] bg-[#25D366] text-white font-montserrat font-black text-[13px] tracking-[2px] uppercase rounded-xl transition-transform active:scale-95 shadow-[0_4px_20px_rgba(37,211,102,0.2)]"
                 >
-                    📱 Enviar Texto
+                    📱 Enviar no WhatsApp
                 </button>
             </div>
 
