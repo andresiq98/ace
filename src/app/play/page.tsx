@@ -95,14 +95,15 @@ export default function PlayPage() {
 
                 {/* Situational Drills (MVP Placeholders) */}
                 {[
-                    { icon: "⚡", title: "O Sniper do Saque", desc: "Saque preciso + ataque mortal" },
-                    { icon: "👑", title: "Rei do Winner", desc: "Winner limpo vale x3" },
-                    { icon: "💀", title: "Tie-Break da Morte", desc: "Começa no 4×4. Pressão total" },
-                    { icon: "⚔️", title: "Guerra de Trincheira", desc: "Só slice e deixadinha" }
-                ].map((drill, idx) => (
+                    { id: "1", icon: "⚡", title: "O Sniper do Saque", desc: "Saque preciso + ataque mortal" },
+                    { id: "2", icon: "👑", title: "Rei do Winner", desc: "Winner limpo vale x3" },
+                    { id: "3", icon: "💀", title: "Tie-Break da Morte", desc: "Começa no 4×4. Pressão total" },
+                    { id: "4", icon: "⚔️", title: "Guerra de Trincheira", desc: "Só slice e deixadinha" }
+                ].map((drill) => (
                     <div
-                        key={idx}
-                        className="bg-[#111113] border border-[#27272A] rounded-2xl p-4 flex items-center gap-4 opacity-70 grayscale transition-all"
+                        key={drill.id}
+                        onClick={() => router.push(`/play/log-drill?drill=${drill.id}`)}
+                        className="bg-[#111113] border border-[#27272A] rounded-2xl p-4 flex items-center gap-4 transition-all cursor-pointer active:scale-[0.98] hover:border-[rgba(204,255,0,0.3)]"
                     >
                         <div className="w-12 h-12 bg-[#18181B] border border-[#27272A] rounded-xl flex items-center justify-center text-2xl shrink-0">
                             {drill.icon}

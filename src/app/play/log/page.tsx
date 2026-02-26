@@ -299,18 +299,16 @@ export default function LogMatchPage() {
                             {mode === "duplas" ? "📊 Pontos Individuais" : "📊 Pontos"}
                         </div>
                         <div className="text-[11px] font-bold text-[#A1A1AA] flex items-center gap-2">
-                            <span className="text-[#CCFF00]">✓</span> Participação +4 {mode === "duplas" && <span className="text-[#52525B]">(cada jogador)</span>}
+                            <span className="text-[#CCFF00]">✓</span> Participação +4 {mode === "duplas" && <span className="text-[#52525B]">(para cada jogador faturar individualmente)</span>}
                         </div>
                         {winner === "me" && (
                             <div className="text-[11px] font-bold text-[#CCFF00] flex items-center gap-2">
-                                <span>🏆</span> Vitória +6 {mode === "duplas" && <span className="text-[#52525B]">(cada um do time)</span>}
+                                <span>🏆</span> Vitória +6 {mode === "duplas" && <span className="text-[#52525B]">(para cada um do time)</span>}
                             </div>
                         )}
-                        {mode === "duplas" && (
-                            <div className="text-[10px] text-[#52525B] mt-1 italic">
-                                Cada jogador ganha pontos individuais no ranking único.
-                            </div>
-                        )}
+                        <div className="text-[10px] text-[#52525B] mt-1 italic leading-tight">
+                            Atenção: no tênis de duplas, os pontos do ranking vão INVIDIDUALMENTE para cada jogador. Jogue com parceiros diferentes e suba sozinho!
+                        </div>
                     </div>
                 )}
             </div>

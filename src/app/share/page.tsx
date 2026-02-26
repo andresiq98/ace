@@ -1,12 +1,19 @@
 "use client";
 
 import { useAuth } from "@/lib/auth-context";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, Suspense } from "react";
 
-export default function SharePage() {
+function ShareContent() {
     const { user, loading } = useAuth();
     const router = useRouter();
+    const params = useSearchParams();
+
+    const didWin = params.get("win") === "true";
+    const score = params.get("score") || "6×2";
+    const rival = params.get("rival") || "Rival";
+    const mode = params.get("mode") || "simples";
+    const drill = params.get("drill") || "Treino Geral";
 
     useEffect(() => {
         if (!loading && !user) {
@@ -17,18 +24,10 @@ export default function SharePage() {
     if (loading || !user) return <div className="min-h-screen bg-black flex items-center justify-center text-white">Carregando...</div>;
 
     const handleShareWhatsApp = () => {
-        const text = `🎾 *ACE — Tênis Competitivo*
+        const text = mode === "treino"
+            ? `🎾 *ACE — Tênis Competitivo*\n\n🎯 Treino Concluído: *${drill}*\n🔥 Parceiros: ${rival}\n\n🏆 Top 3:\n1. Rafael Moura — 58pts\n2. Carlos Augusto — 54pts ← 🔥\n3. Lucas Pinheiro — 41pts\n\n🔗 Grupo: *ACE24*\nace.app/join/ACE24`
+            : `🎾 *ACE — Tênis Competitivo*\n\n⚡ Missão: ${mode === "duplas" ? "Duplas" : "Set Normal"}\n📊 ${user?.displayName?.split(" ")[0] || "Carlos"} ${score} ${rival}\n\n🏆 Top 3:\n1. Rafael Moura — 58pts\n2. Carlos Augusto — 52pts ← 🔥\n3. Lucas Pinheiro — 41pts\n\n🔗 Grupo: *ACE24*\nace.app/join/ACE24`;
 
-⚡ Missão: Set Normal
-📊 Carlos A. 6×2 Rafael M.
-
-🏆 Top 3:
-1. Rafael Moura — 58pts
-2. Carlos Augusto — 52pts ← 🔥
-3. Lucas Pinheiro — 41pts
-
-🔗 Grupo: *ACE24*
-ace.app/join/ACE24`;
         window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
     };
 
@@ -74,25 +73,52 @@ ace.app/join/ACE24`;
                     </div>
                 </div>
 
-                {/* Match Result */}
-                <div className="bg-black/40 border border-[#27272A] rounded-2xl p-4 mb-6 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#CCFF00] to-transparent opacity-20" />
-                    <div className="text-[9px] font-bold text-[#CCFF00] font-montserrat tracking-[2px] uppercase mb-4 text-center">⚡ Set Normal</div>
-
-                    <div className="flex items-center justify-between">
-                        <div className="flex flex-col items-center">
-                            <div className="w-12 h-12 bg-[#CCFF00] text-black font-montserrat font-black flex items-center justify-center rounded-full text-lg mb-1 shadow-[0_0_15px_rgba(204,255,0,0.15)]">CA</div>
-                            <div className="text-[11px] font-bold text-white">Carlos A.</div>
-                            <div className="text-[9px] text-[#CCFF00] font-bold mt-1 scale-90">🏆 VENCEDOR</div>
+                {/* Match Result or Training Status */}
+                {mode === "treino" ? (
+                    <div className="bg-black/40 border border-[#27272A] rounded-2xl p-6 mb-6 relative overflow-hidden flex flex-col items-center justify-center min-h-[140px]">
+                        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#CCFF00] to-transparent opacity-30" />
+                        <div className="text-[40px] mb-2 drop-shadow-[0_0_15px_rgba(204,255,0,0.5)]">🎯</div>
+                        <div className="font-montserrat font-black text-2xl text-white tracking-[-1px] text-center uppercase break-words w-full px-2">
+                            {drill}
                         </div>
-                        <div className="font-montserrat font-black text-4xl text-white tracking-[-2px] text-shadow-sm">6×2</div>
-                        <div className="flex flex-col items-center opacity-50">
-                            <div className="w-12 h-12 bg-[#333] text-white font-montserrat font-black flex items-center justify-center rounded-full text-lg mb-1 border-2 border-transparent">RM</div>
-                            <div className="text-[11px] font-bold text-white">Rafael M.</div>
-                            <div className="text-[9px] text-transparent mt-1">-</div>
+                        <div className="text-[10px] text-[#A1A1AA] mt-3 font-bold uppercase tracking-[2px]">
+                            Treino Concluído
                         </div>
                     </div>
-                </div>
+                ) : (
+                    <div className="bg-black/40 border border-[#27272A] rounded-2xl p-4 mb-6 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#CCFF00] to-transparent opacity-20" />
+                        <div className="text-[9px] font-bold text-[#CCFF00] font-montserrat tracking-[2px] uppercase mb-4 text-center">
+                            ⚡ {mode === "duplas" ? "Duplas" : "Set Normal"}
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                            <div className="flex flex-col items-center w-[70px]">
+                                <div className={`w-12 h-12 bg-[#CCFF00] text-black font-montserrat font-black flex items-center justify-center rounded-full text-lg mb-1 ${didWin ? "shadow-[0_0_15px_rgba(204,255,0,0.15)]" : "border-2 border-[#27272A] opacity-50 bg-transparent text-white"}`}>
+                                    {user?.displayName?.split(" ")[0].slice(0, 2).toUpperCase() || "CA"}
+                                </div>
+                                <div className="text-[11px] font-bold text-white text-center w-full truncate">
+                                    {user?.displayName?.split(" ")[0] || "Carlos A."}
+                                </div>
+                                {didWin && <div className="text-[9px] text-[#CCFF00] font-bold mt-1 scale-90">🏆 VENCEDOR</div>}
+                            </div>
+
+                            <div className="font-montserrat font-black text-4xl text-white tracking-[-2px] text-shadow-sm px-2">
+                                {score}
+                            </div>
+
+                            <div className="flex flex-col items-center w-[70px]">
+                                <div className={`w-12 h-12 ${didWin ? "bg-[#333] text-white opacity-50 border-2 border-transparent" : "bg-[#CCFF00] text-black shadow-[0_0_15px_rgba(204,255,0,0.15)]"} font-montserrat font-black flex items-center justify-center rounded-full text-lg mb-1`}>
+                                    {rival.split(" ")[0].slice(0, 2).toUpperCase()}
+                                </div>
+                                <div className="text-[11px] font-bold text-white text-center w-full truncate">
+                                    {rival.split(" ")[0]}
+                                </div>
+                                {!didWin && <div className="text-[9px] text-[#CCFF00] font-bold mt-1 scale-90">🏆 VENCEDOR</div>}
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Updated Top 3 */}
                 <div className="mb-6">
@@ -148,5 +174,13 @@ ace.app/join/ACE24`;
                 <button onClick={() => router.push("/home")} className="text-[#A1A1AA] text-xs font-bold uppercase tracking-wider underline">← Voltar pra Home</button>
             </div>
         </div>
+    );
+}
+
+export default function SharePage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-white">Carregando...</div>}>
+            <ShareContent />
+        </Suspense>
     );
 }
