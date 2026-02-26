@@ -13,8 +13,12 @@ export default function LoginPage() {
   const displayError = localError || authError;
 
   useEffect(() => {
+    console.log("[LoginPage] Auth State:", { loading, user: user?.uid });
+
+    // Using a small timeout to ensure we don't race redirect loops
     if (!loading && user) {
-      router.push("/home");
+      console.log("[LoginPage] Authorized user found. Redirecting to groups/create.");
+      router.push("/groups/create");
     }
   }, [user, loading, router]);
 

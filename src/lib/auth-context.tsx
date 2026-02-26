@@ -45,7 +45,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             console.log("[ACE Auth] Auth state changed:", currentUser ? `Logged in as ${currentUser.displayName}` : "Not logged in");
             setUser(currentUser);
-            setLoading(false);
+
+            // Give Next.js router a moment to digest before marking loading=false
+            setTimeout(() => {
+                setLoading(false);
+            }, 100);
         });
 
         return () => unsubscribe();

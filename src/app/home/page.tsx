@@ -8,11 +8,7 @@ export default function HomePage() {
     const { user, logout, loading } = useAuth();
     const router = useRouter();
 
-    useEffect(() => {
-        if (!loading && !user) {
-            router.push("/");
-        }
-    }, [user, loading, router]);
+    // Removed aggressive redirect to prevent race conditions
 
     if (loading || !user) {
         return (
