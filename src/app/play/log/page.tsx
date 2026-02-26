@@ -87,15 +87,14 @@ export default function LogMatchPage() {
     const handleSaveResult = () => {
         if (!isComplete) return;
 
-        if (mode === "simples") {
-            const msg = `Resultado Salvo!\n${winner === "me" ? "Você venceu" : `${rival!.name} venceu`} de ${score}`;
-            alert(msg);
-        } else {
-            const winTeam = winner === "me" ? `${ME.name} & ${partner!.name}` : `${opponents[0].name} & ${opponents[1].name}`;
-            const msg = `Resultado Salvo!\n${winTeam} venceu de ${score}\n\nPontos individuais adicionados ao ranking!`;
-            alert(msg);
-        }
-        router.push("/home");
+        console.log("Saving Match:", { mode, rival, partner, opponents, winner, score });
+
+        const rivalName = mode === "simples"
+            ? rival!.name
+            : `${opponents[0].name} & ${opponents[1].name}`;
+        const pts = winner === "me" ? "12.5" : "4";
+
+        router.push(`/celebration?win=${winner === "me"}&score=${encodeURIComponent(score!)}&rival=${encodeURIComponent(rivalName)}&mode=${mode}&pts=${pts}`);
     };
 
     return (
