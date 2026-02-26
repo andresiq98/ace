@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import {
     onAuthStateChanged,
     signInWithRedirect,
+    signInWithPopup,
     getRedirectResult,
     signOut,
     User,
@@ -58,11 +59,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const signInWithGoogle = async () => {
         try {
             setError(null);
-            console.log("[ACE Auth] Starting Google Sign-In with redirect...");
-            await signInWithRedirect(auth, googleProvider);
+            console.log("[ACE Auth] Starting Google Sign-In with popup...");
+            await signInWithPopup(auth, googleProvider);
         } catch (err: any) {
-            console.error("[ACE Auth] Sign-in setup error:", err);
-            setError(`Falha local: ${err.message}`);
+            console.warn("[ACE Auth] Popup failed:", err.code, err.message);
+
+            // If popup is blocked by mobile browsers, fallback to redirect
+            if (err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request') {
+                console.log("[ACE Auth] Falling back to redirect...");
+                try {
+                    await signInWithRedirect(auth, googleProvider);
+                } catch (redirectErr: any) {
+                    setError(`Falha no redirecionamento: ${redirectErr.message}`);
+                    throw redirectErr;
+                }
+            } else {
+                setError(`Falha local: ${err.message}`);
+                throw err;
+            }
         }
     };
 
