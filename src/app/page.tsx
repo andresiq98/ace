@@ -5,10 +5,12 @@ import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const { user, signInWithGoogle, loading } = useAuth();
+  const { user, signInWithGoogle, loading, error: authError } = useAuth();
   const router = useRouter();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [localError, setLocalError] = useState<string | null>(null);
+
+  const displayError = localError || authError;
 
   useEffect(() => {
     if (!loading && user) {
@@ -18,13 +20,13 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async () => {
     setIsAuthenticating(true);
-    setError(null);
+    setLocalError(null);
     try {
       await signInWithGoogle();
       // Router redirection is handled in the useEffect above
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to login", err);
-      setError("Erro ao fazer login. Tente novamente.");
+      setLocalError(`Erro: ${err.message || "Falha desconhecida."}`);
       setIsAuthenticating(false);
     }
   };
@@ -88,9 +90,9 @@ export default function LoginPage() {
         </p>
 
         {/* Error message */}
-        {error && (
+        {displayError && (
           <div className="w-full mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-center">
-            <p className="text-red-400 text-xs font-bold">{error}</p>
+            <p className="text-red-400 text-xs font-bold whitespace-pre-line">{displayError}</p>
           </div>
         )}
 
