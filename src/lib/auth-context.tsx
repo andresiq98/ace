@@ -3,10 +3,10 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import {
     onAuthStateChanged,
-    signInWithRedirect,
-    getRedirectResult,
+    signInWithPopup,
     signOut,
-    User
+    User,
+    browserPopupRedirectResolver,
 } from "firebase/auth";
 import { auth, googleProvider } from "./firebase";
 
@@ -24,9 +24,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        getRedirectResult(auth).catch(console.error);
-
+        console.log("[ACE Auth] Setting up auth state listener...");
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            console.log("[ACE Auth] Auth state changed:", currentUser ? `Logged in as ${currentUser.displayName}` : "Not logged in");
             setUser(currentUser);
             setLoading(false);
         });
@@ -36,10 +36,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const signInWithGoogle = async () => {
         try {
-            await signInWithRedirect(auth, googleProvider);
-        } catch (error) {
-            console.error("Error signing in with Google:", error);
-            throw error;
+            console.log("[ACE Auth] Starting Google Sign-In with popup...");
+            const result = await signInWithPopup(auth, googleProvider, browserPopupRedirectResolver);
+            console.log("[ACE Auth] Sign-in successful:", result.user.displayName);
+        } catch (error: unknown) {
+            const firebaseError = error as { code?: string; message?: string };
+            console.error("[ACE Auth] Sign-in error:", firebaseError.code, firebaseError.message);
+
+            // If popup was blocked, show a helpful message
+            if (firebaseError.code === "auth/popup-blocked") {
+                alert("O popup foi bloqueado pelo navegador. Desative o bloqueador de popups e tente novamente.");
+            } else if (firebaseError.code === "auth/popup-closed-by-user") {
+                console.log("[ACE Auth] User closed the popup.");
+                // Don't throw — user simply cancelled
+                return;
+            } else if (firebaseError.code === "auth/cancelled-popup-request") {
+                console.log("[ACE Auth] Duplicate popup request cancelled.");
+                return;
+            } else {
+                throw error;
+            }
         }
     };
 
@@ -47,7 +63,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             await signOut(auth);
         } catch (error) {
-            console.error("Error signing out:", error);
+            console.error("[ACE Auth] Error signing out:", error);
         }
     };
 
