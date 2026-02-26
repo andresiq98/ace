@@ -63,7 +63,7 @@ export default function HomePage() {
                 <div className="absolute inset-0 bg-gradient-to-b from-[#18181B] to-[#111113] rounded-2xl border border-[#27272A] opacity-90 backdrop-blur-md" />
                 <div className="relative p-5 py-8 flex flex-col items-center">
                     <div className="text-4xl mb-3 animate-[cta-bounce_2s_ease-in-out_infinite]">🎾</div>
-                    <h3 className="font-montserrat font-black text-lg uppercase tracking-wide text-white mb-1">Registrar Treinasso</h3>
+                    <h3 className="font-montserrat font-black text-lg uppercase tracking-wide text-white mb-1">BORA PRO PLAY</h3>
                     <p className="text-[11px] text-[#A1A1AA] font-bold tracking-widest uppercase text-center">Compete · Pontue · Suba no Ranking</p>
                 </div>
             </div>
