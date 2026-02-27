@@ -6,6 +6,8 @@ import { toPng } from "html-to-image";
 import { getDrillById } from "@/lib/drills";
 import { CURRENT_USER, MOCK_PLAYERS, MOCK_LEADERBOARD, MOCK_GROUP } from "@/lib/data";
 
+
+
 function ShareContent() {
     const params = useParams();
     const searchParams = useSearchParams();

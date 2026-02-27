@@ -4,6 +4,8 @@ import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
+
+
 // Mock Data for MVP
 const MOCK_RANKING = [
     { id: "1", name: "Rafael", fullName: "Rafael Moura", initials: "RM", points: 58, position: 1, color: "from-[#FFD700] to-[#FF8F00]", text: "text-black", stats: "7 jogos" },

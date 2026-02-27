@@ -7,6 +7,8 @@ import { getDrillById } from "@/lib/drills";
 import { CURRENT_USER, MOCK_PLAYERS, getScoreOptions, calculatePoints, DURATION_FORMAT } from "@/lib/data";
 import { ArrowLeft } from "lucide-react";
 
+
+
 function LogContent() {
     const params = useParams();
     const router = useRouter();

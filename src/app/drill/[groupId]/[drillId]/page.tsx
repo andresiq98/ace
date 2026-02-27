@@ -6,6 +6,8 @@ import { getDrillById } from "@/lib/drills";
 import { DURATION_FORMAT } from "@/lib/data";
 import { ArrowLeft } from "lucide-react";
 
+
+
 function DrillContent() {
     const params = useParams();
     const router = useRouter();

@@ -10,6 +10,8 @@ import {
     User,
 } from "firebase/auth";
 import { auth, googleProvider } from "./firebase";
+import { Capacitor } from "@capacitor/core";
+import { FirebaseAuthentication } from "@capacitor-firebase/authentication";
 
 interface AuthContextType {
     user: User | null;
@@ -59,13 +61,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const signInWithGoogle = async () => {
         try {
             setError(null);
-            console.log("[ACE Auth] Starting Google Sign-In with popup...");
-            await signInWithPopup(auth, googleProvider);
+
+            if (Capacitor.isNativePlatform()) {
+                console.log("[ACE Auth] Starting Native Google Sign-In...");
+                const result = await FirebaseAuthentication.signInWithGoogle();
+                console.log("[ACE Auth] Native login result:", result.user?.displayName);
+                // The onAuthStateChanged listener will automatically pick up the user 
+                // because Capacitor Firebase Auth syncs with the JS Firebase Auth instance.
+            } else {
+                console.log("[ACE Auth] Starting Web Google Sign-In with popup...");
+                await signInWithPopup(auth, googleProvider);
+            }
         } catch (err: any) {
-            console.warn("[ACE Auth] Popup failed:", err.code, err.message);
+            console.warn("[ACE Auth] Login failed:", err.code, err.message);
 
             // If popup is blocked by mobile browsers, fallback to redirect
-            if (err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request') {
+            if (!Capacitor.isNativePlatform() && (err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request')) {
                 console.log("[ACE Auth] Falling back to redirect...");
                 try {
                     await signInWithRedirect(auth, googleProvider);
@@ -74,7 +85,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     throw redirectErr;
                 }
             } else {
-                setError(`Falha local: ${err.message}`);
+                setError(`Falha no login: ${err.message}`);
                 throw err;
             }
         }
