@@ -56,7 +56,7 @@ export default function HomePage() {
 
             {/* Main CTA */}
             <div
-                onClick={() => router.push('/play')}
+                onClick={() => router.push('/home/play')}
                 className="px-5 mt-4 z-10 w-full relative group cursor-pointer active:scale-95 transition-transform"
             >
                 <div className="absolute inset-0 bg-gradient-to-b from-[#18181B] to-[#111113] rounded-2xl border border-[#27272A] opacity-90 backdrop-blur-md" />
