@@ -9,7 +9,6 @@ export default function PlayPage() {
     const router = useRouter();
     const [selectedMode, setSelectedMode] = useState<DrillMode>("competitive");
     const [playerCount, setPlayerCount] = useState(4);
-    const [duration, setDuration] = useState(60);
     const [showSchedule, setShowSchedule] = useState(false);
     const [scheduleDate, setScheduleDate] = useState("");
     const [scheduleTime, setScheduleTime] = useState("");
@@ -43,7 +42,7 @@ export default function PlayPage() {
             .filter(Boolean)
             .join(", ");
 
-        const msg = `🎾 *ACE — Jogo Agendado!*\n\n📅 ${getDayOfWeek(scheduleDate)}, ${formatDateBR(scheduleDate)}\n⏰ ${scheduleTime}h\n👥 ${playerNames || "Galera"}\n⏱ Treino de ${duration} min\n\n🔥 Bora pra quadra!\n\n📲 Código do grupo: *${MOCK_GROUP.inviteCode}*\nace.app/join/${MOCK_GROUP.inviteCode}`;
+        const msg = `🎾 *ACE — Jogo Agendado!*\n\n📅 ${getDayOfWeek(scheduleDate)}, ${formatDateBR(scheduleDate)}\n⏰ ${scheduleTime}h\n👥 ${playerNames || "Galera"}\n\n🔥 Bora pra quadra!\n\n📲 Código do grupo: *${MOCK_GROUP.inviteCode}*\nace.app/join/${MOCK_GROUP.inviteCode}`;
 
         window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
         setScheduleConfirmed(true);
@@ -52,18 +51,6 @@ export default function PlayPage() {
             setScheduleConfirmed(false);
         }, 2000);
     };
-
-    // Dynamic format info based on duration
-    const getFormatInfo = (dur: number) => {
-        switch (dur) {
-            case 30: return { label: "Jogo Rápido", desc: "Pontos corridos ou sets curtos", icon: "⚡" };
-            case 60: return { label: "Set Completo", desc: "1 set com tie-break", icon: "🎾" };
-            case 90: return { label: "Melhor de 3", desc: "Match completo", icon: "🏆" };
-            default: return { label: "Personalizado", desc: "", icon: "⚙️" };
-        }
-    };
-
-    const formatInfo = getFormatInfo(duration);
 
     return (
         <div>
@@ -109,53 +96,24 @@ export default function PlayPage() {
             {/* Player Count */}
             <div className="px-5 mb-5">
                 <div className="font-display text-[9px] tracking-[5px] uppercase font-bold text-ace-muted mb-2.5">
-                    Quantidade de Pessoas
+                    Modo de Jogo
                 </div>
                 <div className="flex bg-ace-surface border border-ace-border rounded-xl p-1 gap-1">
-                    {[2, 3, 4].map((n) => (
+                    {[
+                        { val: 2, label: "Simples (2)" },
+                        { val: 4, label: "Duplas (4)" }
+                    ].map((opt) => (
                         <button
-                            key={n}
-                            onClick={() => setPlayerCount(n)}
-                            className={`flex-1 h-[42px] rounded-lg flex items-center justify-center font-display font-extrabold text-sm tracking-[1px] cursor-pointer transition-all duration-250 active:scale-[0.94] ${playerCount === n
+                            key={opt.val}
+                            onClick={() => setPlayerCount(opt.val)}
+                            className={`flex-1 h-[42px] rounded-lg flex items-center justify-center font-display font-extrabold text-sm tracking-[1px] cursor-pointer transition-all duration-250 active:scale-[0.94] ${playerCount === opt.val
                                 ? "bg-neon text-background shadow-[0_2px_12px_rgba(204,255,0,0.2)]"
                                 : "text-ace-muted"
                                 }`}
                         >
-                            {n}
+                            {opt.label}
                         </button>
                     ))}
-                </div>
-            </div>
-
-            {/* Duration */}
-            <div className="px-5 mb-3">
-                <div className="font-display text-[9px] tracking-[5px] uppercase font-bold text-ace-muted mb-2.5">
-                    Tempo de Treino
-                </div>
-                <div className="flex bg-ace-surface border border-ace-border rounded-xl p-1 gap-1">
-                    {[30, 60, 90].map((m) => (
-                        <button
-                            key={m}
-                            onClick={() => setDuration(m)}
-                            className={`flex-1 h-[42px] rounded-lg flex items-center justify-center font-display font-extrabold text-sm tracking-[1px] cursor-pointer transition-all duration-250 active:scale-[0.94] ${duration === m
-                                ? "bg-neon text-background shadow-[0_2px_12px_rgba(204,255,0,0.2)]"
-                                : "text-ace-muted"
-                                }`}
-                        >
-                            {m}m
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            {/* Dynamic Format Info */}
-            <div className="px-5 mb-6">
-                <div className="bg-neon/[0.04] border border-neon/15 rounded-xl p-3.5 flex items-center gap-3 animate-slide-up">
-                    <div className="text-2xl shrink-0">{formatInfo.icon}</div>
-                    <div>
-                        <div className="font-display font-bold text-sm text-neon">{formatInfo.label}</div>
-                        <div className="text-[11px] text-ace-muted mt-[2px]">{formatInfo.desc}</div>
-                    </div>
                 </div>
             </div>
 
@@ -247,7 +205,7 @@ export default function PlayPage() {
                                 <div className="font-display font-black text-lg tracking-[-0.5px]">
                                     {getDayOfWeek(scheduleDate)}, {formatDateBR(scheduleDate)}
                                 </div>
-                                <div className="text-sm text-ace-mid font-semibold">às {scheduleTime}h · {duration} min</div>
+                                <div className="text-sm text-ace-mid font-semibold">às {scheduleTime}h</div>
                                 {selectedPlayers.length > 0 && (
                                     <div className="text-[11px] text-ace-muted mt-1.5">
                                         📨 Notificar: {selectedPlayers.map(id => MOCK_PLAYERS.find(p => p.id === id)?.displayName.split(" ")[0]).join(", ")}
@@ -278,7 +236,7 @@ export default function PlayPage() {
             </div>
             <div className="px-5 mb-6">
                 <button
-                    onClick={() => router.push(`/log/group-coxos/set-normal?duration=${duration}`)}
+                    onClick={() => router.push(`/play/log?mode=${playerCount === 2 ? 'simples' : 'duplas'}`)}
                     className="w-full bg-gradient-to-br from-neon/[0.06] to-neon/[0.01] border-[2px] border-neon/30 rounded-2xl p-5 cursor-pointer flex items-center gap-4 transition-all duration-250 active:scale-[0.97] hover:border-neon/50 text-left relative overflow-hidden shadow-[0_2px_16px_rgba(204,255,0,0.06)]"
                 >
                     <div className="absolute top-0 right-0 bg-neon text-background font-display text-[8px] font-black tracking-[2px] uppercase px-3 py-[4px] rounded-[0_16px_0_12px]">
@@ -296,7 +254,7 @@ export default function PlayPage() {
                         </div>
                         <div className="flex gap-1.5 flex-wrap">
                             <span className="bg-white/[0.04] border border-ace-border rounded-md px-2 py-[3px] text-[9px] font-semibold text-ace-mid">
-                                ⏱ {duration} min
+                                ⭐ Vale ranking
                             </span>
                             <span className="bg-white/[0.04] border border-ace-border rounded-md px-2 py-[3px] text-[9px] font-semibold text-ace-mid">
                                 🏆 Vale pontos
@@ -327,7 +285,7 @@ export default function PlayPage() {
                 {drills.map((drill) => (
                     <button
                         key={drill.id}
-                        onClick={() => router.push(`/drill/group-coxos/${drill.id}?duration=${duration}`)}
+                        onClick={() => router.push(`/drill/group-coxos/${drill.id}`)}
                         className="w-full bg-ace-surface border-2 border-ace-border rounded-2xl p-[18px] cursor-pointer flex items-center gap-4 transition-all duration-250 active:scale-[0.97] hover:border-neon/30 text-left"
                     >
                         <div className="w-[52px] h-[52px] bg-ace-surface2 rounded-[14px] flex items-center justify-center text-2xl shrink-0">
