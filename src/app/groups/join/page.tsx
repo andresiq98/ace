@@ -2,22 +2,36 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth-context";
+import { joinGroupByCode } from "@/lib/firestore-service";
 
 export default function JoinGroupPage() {
     const router = useRouter();
+    const { user } = useAuth();
     const [code, setCode] = useState("");
+    const [isJoining, setIsJoining] = useState(false);
 
-    const handleJoin = () => {
+    const handleJoin = async () => {
         if (!code.trim() || code.length < 4) {
             return alert("Digite um código válido!");
         }
+        if (!user) return alert("Você precisa estar logado!");
 
-        // For MVP, simulate joining and redirect
-        console.log("Joining Group with code:", code);
-
-        // In the real app, we check Firestore for the group code,
-        // Add user to the group members list, and redirect
-        router.push("/home");
+        setIsJoining(true);
+        try {
+            const group = await joinGroupByCode(code.trim(), user.uid);
+            if (!group) {
+                alert("Código não encontrado! Verifique e tente novamente.");
+                return;
+            }
+            console.log("[ACE] Joined group:", group.id, group.name);
+            router.push("/home");
+        } catch (err: any) {
+            console.error("[ACE] Failed to join group:", err);
+            alert(`Erro ao entrar no grupo: ${err.message}`);
+        } finally {
+            setIsJoining(false);
+        }
     };
 
     return (
@@ -49,7 +63,7 @@ export default function JoinGroupPage() {
                 <div className="mb-8">
                     <input
                         type="text"
-                        placeholder="EX: A1B2"
+                        placeholder="EX: A1B2C"
                         value={code}
                         onChange={(e) => setCode(e.target.value.toUpperCase())}
                         maxLength={6}
@@ -59,9 +73,10 @@ export default function JoinGroupPage() {
 
                 <button
                     onClick={handleJoin}
-                    className="w-full flex items-center justify-center gap-2 h-[52px] bg-[#CCFF00] text-black font-montserrat font-black text-[13px] tracking-[2px] uppercase rounded-xl transition-transform active:scale-95 shadow-[0_4px_20px_rgba(204,255,0,0.2)]"
+                    disabled={isJoining}
+                    className="w-full flex items-center justify-center gap-2 h-[52px] bg-[#CCFF00] text-black font-montserrat font-black text-[13px] tracking-[2px] uppercase rounded-xl transition-transform active:scale-95 shadow-[0_4px_20px_rgba(204,255,0,0.2)] disabled:opacity-50"
                 >
-                    Entrar na Arena
+                    {isJoining ? "Entrando..." : "Entrar na Arena"}
                 </button>
             </div>
         </div>

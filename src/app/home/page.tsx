@@ -2,13 +2,48 @@
 
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { getUserGroups, getGroupLeaderboard, type Group, type LeaderboardEntry } from "@/lib/firestore-service";
 
 export default function HomePage() {
-    const { user, logout, loading } = useAuth();
+    const { user, userProfile, logout, loading } = useAuth();
     const router = useRouter();
+    const [groups, setGroups] = useState<Group[]>([]);
+    const [myRank, setMyRank] = useState<number | null>(null);
+    const [myPoints, setMyPoints] = useState<number>(0);
+    const [loadingData, setLoadingData] = useState(true);
 
-    // Removed aggressive redirect to prevent race conditions
+    useEffect(() => {
+        if (!loading && !user) {
+            router.push("/");
+            return;
+        }
+        if (user) {
+            loadUserData();
+        }
+    }, [user, loading]);
+
+    const loadUserData = async () => {
+        if (!user) return;
+        try {
+            const userGroups = await getUserGroups(user.uid);
+            setGroups(userGroups);
+
+            // Get rank from first group
+            if (userGroups.length > 0) {
+                const leaderboard = await getGroupLeaderboard(userGroups[0].id);
+                const myIdx = leaderboard.findIndex(e => e.userId === user.uid);
+                if (myIdx >= 0) {
+                    setMyRank(myIdx + 1);
+                    setMyPoints(leaderboard[myIdx].points);
+                }
+            }
+        } catch (err) {
+            console.error("[ACE] Failed to load user data:", err);
+        } finally {
+            setLoadingData(false);
+        }
+    };
 
     if (loading || !user) {
         return (
@@ -18,10 +53,20 @@ export default function HomePage() {
         );
     }
 
+    // If user has no groups, redirect to group selection
+    if (!loadingData && groups.length === 0) {
+        router.push("/groups");
+        return null;
+    }
+
     const handleLogout = async () => {
         await logout();
         router.push("/");
     };
+
+    const displayName = userProfile?.displayName || user.displayName || "Jogador";
+    const initials = userProfile?.initials || displayName.substring(0, 2).toUpperCase();
+    const gradient = userProfile?.gradient || "linear-gradient(135deg, #CCFF00, #A8D400)";
 
     return (
         <div className="flex flex-col h-full bg-black text-white relative overflow-hidden">
@@ -42,14 +87,20 @@ export default function HomePage() {
             {/* Welcome Banner */}
             <div className="px-5 py-4 w-full relative z-10 flex flex-col mt-4">
                 <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-full relative bg-[#CCFF00] text-black font-montserrat font-black text-sm flex items-center justify-center border-2 border-[#CCFF00] shadow-[0_0_20px_rgba(204,255,0,0.2)]">
-                        CA
-                        <div className="absolute bottom-[-6px] right-[-6px] bg-[#FFD700] text-black text-[9px] font-extrabold px-1.5 py-0.5 rounded-md font-montserrat whitespace-nowrap shadow-[0_2px_8px_rgba(255,215,0,0.3)]">MVP 🌟</div>
+                    <div
+                        className="w-12 h-12 rounded-full relative font-montserrat font-black text-sm flex items-center justify-center border-2 border-[#CCFF00] shadow-[0_0_20px_rgba(204,255,0,0.2)]"
+                        style={{ background: gradient, color: userProfile?.textColor || "#000" }}
+                    >
+                        {userProfile?.photoURL ? (
+                            <img src={userProfile.photoURL} alt="" className="w-full h-full rounded-full object-cover" />
+                        ) : (
+                            initials
+                        )}
                     </div>
                 </div>
 
                 <h2 className="font-montserrat font-black text-2xl uppercase tracking-tight mb-1 text-white">
-                    E AÍ, CAMPEÃO?
+                    E AÍ, {displayName.split(" ")[0].toUpperCase()}!
                 </h2>
                 <p className="text-sm text-[#A1A1AA]">Pronto pra mais uma?</p>
             </div>
@@ -69,18 +120,24 @@ export default function HomePage() {
 
             {/* Stats Preview */}
             <div
-                onClick={() => router.push("/groups/test-group")}
+                onClick={() => groups.length > 0 ? router.push(`/groups/${groups[0].id}`) : null}
                 className="flex gap-2 px-5 mt-5 z-10 w-full relative cursor-pointer active:scale-95 transition-transform"
             >
                 <div className="flex-1 bg-[#111113] border border-[#27272A] rounded-xl p-4">
                     <p className="text-[10px] text-[#52525B] font-bold tracking-[2px] uppercase mb-2">Ranking</p>
-                    <p className="font-montserrat font-black text-2xl text-white mb-1">2°</p>
-                    <p className="text-[10px] text-[#CCFF00] font-bold">↑ +8 pts hoje</p>
+                    <p className="font-montserrat font-black text-2xl text-white mb-1">
+                        {myRank ? `${myRank}°` : "—"}
+                    </p>
+                    <p className="text-[10px] text-[#CCFF00] font-bold">
+                        {groups.length > 0 ? groups[0].name : "Sem grupo"}
+                    </p>
                 </div>
                 <div className="flex-1 bg-[#111113] border border-[#27272A] rounded-xl p-4">
                     <p className="text-[10px] text-[#52525B] font-bold tracking-[2px] uppercase mb-2">Pontos</p>
-                    <p className="font-montserrat font-black text-2xl text-white mb-1">47</p>
-                    <p className="text-[10px] text-[#A1A1AA] font-bold">Semana 3</p>
+                    <p className="font-montserrat font-black text-2xl text-white mb-1">{myPoints}</p>
+                    <p className="text-[10px] text-[#A1A1AA] font-bold">
+                        {userProfile?.totalGamesPlayed || 0} jogos
+                    </p>
                 </div>
             </div>
 

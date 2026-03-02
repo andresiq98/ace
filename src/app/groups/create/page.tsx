@@ -2,24 +2,34 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth-context";
+import { createGroup } from "@/lib/firestore-service";
 
 const EMOJIS = ["🎾", "🏆", "⚡", "🔥", "💀", "🦁"];
 
 export default function CreateGroupPage() {
     const router = useRouter();
+    const { user } = useAuth();
     const [name, setName] = useState("");
     const [emoji, setEmoji] = useState("🎾");
     const [resetFilter, setResetFilter] = useState("Semanal");
+    const [isCreating, setIsCreating] = useState(false);
 
-    const handleCreate = () => {
-        // Basic validation
+    const handleCreate = async () => {
         if (!name.trim()) return alert("Digite um nome para a liga!");
+        if (!user) return alert("Você precisa estar logado!");
 
-        // For MVP, we will just simulate creation and redirect to home
-        console.log("Creating Group:", { name, emoji, resetFilter });
-
-        // Logic to save to firebase will be added later if time permits
-        router.push("/home");
+        setIsCreating(true);
+        try {
+            const group = await createGroup(name.trim(), "zoeira", user.uid);
+            console.log("[ACE] Group created:", group.id, "Code:", group.inviteCode);
+            router.push(`/home`);
+        } catch (err: any) {
+            console.error("[ACE] Failed to create group:", err);
+            alert(`Erro ao criar grupo: ${err.message}`);
+        } finally {
+            setIsCreating(false);
+        }
     };
 
     return (
@@ -93,9 +103,10 @@ export default function CreateGroupPage() {
                 <div className="mt-auto">
                     <button
                         onClick={handleCreate}
-                        className="w-full flex items-center justify-center gap-2 h-[52px] bg-[#CCFF00] text-black font-montserrat font-black text-[13px] tracking-[2px] uppercase rounded-xl transition-transform active:scale-95 shadow-[0_4px_20px_rgba(204,255,0,0.2)]"
+                        disabled={isCreating}
+                        className="w-full flex items-center justify-center gap-2 h-[52px] bg-[#CCFF00] text-black font-montserrat font-black text-[13px] tracking-[2px] uppercase rounded-xl transition-transform active:scale-95 shadow-[0_4px_20px_rgba(204,255,0,0.2)] disabled:opacity-50"
                     >
-                        🏟️ Criar Arena
+                        {isCreating ? "Criando..." : "🏟️ Criar Arena"}
                     </button>
                 </div>
             </div>

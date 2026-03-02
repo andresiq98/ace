@@ -12,9 +12,11 @@ import {
 import { auth, googleProvider } from "./firebase";
 import { Capacitor } from "@capacitor/core";
 import { FirebaseAuthentication } from "@capacitor-firebase/authentication";
+import { ensureUserProfile, type UserProfile } from "./firestore-service";
 
 interface AuthContextType {
     user: User | null;
+    userProfile: UserProfile | null;
     loading: boolean;
     error: string | null;
     signInWithGoogle: () => Promise<void>;
@@ -25,6 +27,7 @@ const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
+    const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -45,9 +48,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 alert(`O Firebase bloqueou este login.\n\nSe você está no celular, você precisa adicionar esse IP local ou Domínio nas configurações "Authorized Domains" do Firebase.\n\nErro exato: ${msg}`);
             });
 
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             console.log("[ACE Auth] Auth state changed:", currentUser ? `Logged in as ${currentUser.displayName}` : "Not logged in");
             setUser(currentUser);
+
+            if (currentUser) {
+                try {
+                    const profile = await ensureUserProfile(currentUser);
+                    console.log("[ACE Auth] User profile ensured:", profile.displayName);
+                    setUserProfile(profile);
+                } catch (err) {
+                    console.error("[ACE Auth] Failed to ensure user profile:", err);
+                }
+            } else {
+                setUserProfile(null);
+            }
 
             // Give Next.js router a moment to digest before marking loading=false
             setTimeout(() => {
@@ -100,7 +115,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, error, signInWithGoogle, logout }}>
+        <AuthContext.Provider value={{ user, userProfile, loading, error, signInWithGoogle, logout }}>
             {children}
         </AuthContext.Provider>
     );
