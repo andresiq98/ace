@@ -17,8 +17,8 @@ export default function LoginPage() {
 
     // Using a small timeout to ensure we don't race redirect loops
     if (!loading && user) {
-      console.log("[LoginPage] Authorized user found. Redirecting to groups/create.");
-      router.push("/groups/create");
+      console.log("[LoginPage] Authorized user found. Redirecting to home.");
+      router.push("/home");
     }
   }, [user, loading, router]);
 
