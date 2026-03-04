@@ -1,5 +1,5 @@
 export function generateStaticParams() {
-    return [{ groupId: "group-coxos", drillId: "set-normal" }];
+    return [{ groupId: "placeholder", drillId: "sniper-do-saque" }];
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

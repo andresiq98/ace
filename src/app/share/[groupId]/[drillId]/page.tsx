@@ -4,25 +4,30 @@ import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import { getDrillById } from "@/lib/drills";
-import { CURRENT_USER, MOCK_PLAYERS, MOCK_LEADERBOARD, MOCK_GROUP } from "@/lib/data";
-
-
+import { getGroup, getGroupLeaderboard, LeaderboardEntry, Group } from "@/lib/firestore-service";
+import { useAuth } from "@/lib/auth-context";
 
 function ShareContent() {
     const params = useParams();
     const searchParams = useSearchParams();
     const router = useRouter();
+    const { user } = useAuth();
     const cardRef = useRef<HTMLDivElement>(null);
 
     const drillId = params.drillId as string;
-    const drill = getDrillById(drillId);
-    const score = searchParams.get("score") || "6×2";
-    const winnerId = searchParams.get("winner") || CURRENT_USER.id;
-    const rivalId = searchParams.get("rival") || "user-rafael";
+    const groupId = params.groupId as string;
 
-    const winner = MOCK_PLAYERS.find(p => p.id === winnerId) || CURRENT_USER;
-    const rival = MOCK_PLAYERS.find(p => p.id === rivalId) || MOCK_PLAYERS[1];
-    const loser = winnerId === CURRENT_USER.id ? rival : CURRENT_USER;
+    // Fallback drill info
+    const drillRaw = getDrillById(drillId);
+    const drill = drillRaw || { emoji: "🎾", title: "Set Normal" };
+
+    const score = searchParams.get("score") || "6×0";
+    const winnerId = searchParams.get("winner");
+    const rivalId = searchParams.get("rival");
+
+    const [group, setGroup] = useState<Group | null>(null);
+    const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+    const [isLoadingData, setIsLoadingData] = useState(true);
 
     const [showToast, setShowToast] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
@@ -31,6 +36,26 @@ function ShareContent() {
     const [confetti, setConfetti] = useState<Array<{ id: number, left: string, color: string, delay: string, duration: string, size: string, radius: string }>>([]);
 
     useEffect(() => {
+        async function loadData() {
+            if (!groupId) return;
+            try {
+                const groupData = await getGroup(groupId);
+                setGroup(groupData);
+
+                const lb = await getGroupLeaderboard(groupId);
+                setLeaderboard(lb);
+            } catch (err) {
+                console.error("Failed to load share data:", err);
+            } finally {
+                setIsLoadingData(false);
+            }
+        }
+        loadData();
+    }, [groupId]);
+
+    useEffect(() => {
+        if (isLoadingData) return;
+
         setShowToast(true);
         setTimeout(() => setShowToast(false), 3500);
 
@@ -46,22 +71,12 @@ function ShareContent() {
         }));
         setConfetti(items);
         setTimeout(() => setConfetti([]), 3000);
-    }, []);
-
-    // Auto-generate image on mount
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            generateImage();
-        }, 500);
-        return () => clearTimeout(timer);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [isLoadingData]);
 
     const generateImage = useCallback(async () => {
-        if (!cardRef.current) return;
+        if (!cardRef.current || isLoadingData) return;
         setIsGenerating(true);
         try {
-            // Get actual dimensions of the card
             const rect = cardRef.current.getBoundingClientRect();
             const dataUrl = await toPng(cardRef.current, {
                 quality: 1.0,
@@ -81,7 +96,16 @@ function ShareContent() {
             console.error("Error generating image:", err);
         }
         setIsGenerating(false);
-    }, []);
+    }, [isLoadingData]);
+
+    // Auto-generate image on mount when data is ready
+    useEffect(() => {
+        if (isLoadingData) return;
+        const timer = setTimeout(() => {
+            generateImage();
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [isLoadingData, generateImage]);
 
     const handleShareImage = async () => {
         if (!imageUrl) {
@@ -94,12 +118,10 @@ function ShareContent() {
             const blob = await res.blob();
             const file = new File([blob], "ace-resultado.png", { type: "image/png" });
 
-            // Share IMAGE ONLY (no text)
             if (navigator.share && navigator.canShare({ files: [file] })) {
                 await navigator.share({ files: [file] });
                 setImageSent(true);
             } else {
-                // Fallback: download image
                 const link = document.createElement("a");
                 link.download = "ace-resultado.png";
                 link.href = imageUrl;
@@ -108,14 +130,17 @@ function ShareContent() {
             }
         } catch (err) {
             console.error("Share failed:", err);
-            // If user dismissed share dialog, still allow step 2
             setImageSent(true);
         }
     };
 
-    // Step 2: Send the link text AFTER the image
     const handleSendLink = () => {
-        const shareText = `🎾 Resultado\n\n📲 Entre na comunidade ACE: ace.app/join/${MOCK_GROUP.inviteCode}`;
+        const inviteCode = group?.inviteCode || "";
+        // In real life this would point to the domain. Since we're in MVP with Firebase Hosting, we use the host
+        const domain = window.location.host;
+        const link = `https://${domain}/groups/join?code=${inviteCode}`;
+        const shareText = `🎾 Resultado da máquina!\n\n📲 Entre no grupo ${group?.name || "ACE"} para participar do ranking:\n${link}`;
+
         window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");
     };
 
@@ -129,9 +154,26 @@ function ShareContent() {
         }
     };
 
+    if (isLoadingData) {
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center text-white">
+                <div className="w-6 h-6 border-2 border-[#CCFF00]/30 border-t-[#CCFF00] rounded-full animate-spin" />
+            </div>
+        );
+    }
+
+    const winnerEntry = leaderboard.find(l => l.userId === winnerId) || leaderboard[0];
+    const loserEntry = leaderboard.find(l => l.userId === rivalId && rivalId !== winnerId) || leaderboard.find(l => l.userId !== winnerId);
+
+    // Fallback if missing
+    const winner = winnerEntry || { displayName: "Player 1", initials: "P1", gradient: "linear-gradient(135deg, #CCFF00, #A8D400)", textColor: "#000", photoURL: undefined };
+    const loser = loserEntry || { displayName: "Player 2", initials: "P2", gradient: "linear-gradient(135deg, #2979FF, #0D47A1)", textColor: "#FFF", photoURL: undefined };
+
+    const top3 = leaderboard.slice(0, 3);
+    const isPlayerInTop3 = top3.some(l => l.userId === user?.uid);
+
     return (
         <div className="h-full flex flex-col">
-            {/* Top Bar */}
             <header className="flex items-center justify-between px-5 pt-14 pb-3.5 sticky top-0 bg-background/92 backdrop-blur-[24px] saturate-[180%] z-50 border-b border-white/[0.04]">
                 <div className="font-display font-black text-[22px] tracking-[-1.5px] uppercase flex items-center gap-2.5">
                     <div className="w-[22px] h-[22px] bg-neon rounded-full relative shadow-[0_0_16px_rgba(204,255,0,0.25)]">
@@ -142,20 +184,18 @@ function ShareContent() {
             </header>
 
             <div className="flex-1 overflow-y-auto no-scrollbar">
-                {/* Title */}
                 <div className="px-5 pt-3 pb-3.5">
                     <h1 className="font-display font-black text-[38px] uppercase tracking-[-2px] leading-[0.92]">
                         COMPARTI-<br />LHE <span className="text-neon">🏆</span>
                     </h1>
                 </div>
 
-                {/* ═══ SHARE CARD (captured by html-to-image) ═══ */}
+                {/* ═══ SHARE CARD ═══ */}
                 <div
                     ref={cardRef}
                     className="mx-4 mb-4 bg-gradient-to-br from-[#0C1400] to-[#080A00] border border-neon/15 rounded-[22px] overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.5),0_0_60px_rgba(204,255,0,0.03)]"
                     style={{ fontFamily: "'Montserrat', 'Arial', sans-serif" }}
                 >
-                    {/* Card Header */}
                     <div className="flex items-center justify-between px-[18px] py-4 border-b border-white/[0.03]">
                         <div>
                             <div className="font-display font-black text-base uppercase tracking-[-0.5px]">
@@ -166,96 +206,79 @@ function ShareContent() {
                             </div>
                         </div>
                         <div className="text-[10px] text-ace-muted text-right">
-                            Grupo<strong className="block text-white text-[13px] font-bold">{MOCK_GROUP.name}</strong>
+                            Grupo<strong className="block text-white text-[13px] font-bold">{group?.name || "ACE"}</strong>
                         </div>
                     </div>
 
-                    {/* Mission + VS */}
                     <div className="px-[18px] py-[18px] border-b border-white/[0.03] text-center">
                         <div className="text-[8px] tracking-[5px] text-neon font-bold uppercase font-display mb-3.5">
-                            {drill?.emoji} {drill?.title || "Set Normal"}
+                            {drill.emoji} {drill.title}
                         </div>
                         <div className="flex items-center justify-center gap-3.5">
-                            {/* Winner */}
                             <div className="text-center flex-1">
                                 <div
-                                    className="w-[52px] h-[52px] rounded-full mx-auto mb-2 flex items-center justify-center font-display font-black text-[17px] border-2 border-neon"
+                                    className="w-[52px] h-[52px] rounded-full mx-auto mb-2 flex items-center justify-center font-display font-black text-[17px] border-2 border-neon overflow-hidden"
                                     style={{ background: winner.gradient, color: winner.textColor }}
                                 >
-                                    {winner.initials}
+                                    {winner.photoURL ? <img src={winner.photoURL} alt="" className="w-full h-full object-cover" /> : winner.initials}
                                 </div>
                                 <div className="font-bold text-[13px] text-white">{winner.displayName.split(" ")[0]}</div>
                                 <div className="text-[9px] font-extrabold text-neon mt-1 font-display tracking-[1.5px]">🏆 VENCEDOR</div>
                             </div>
-
-                            {/* Score */}
                             <div className="font-display font-black text-[44px] tracking-[-1px] text-white">{score}</div>
-
-                            {/* Loser */}
                             <div className="text-center flex-1">
                                 <div
-                                    className="w-[52px] h-[52px] rounded-full mx-auto mb-2 flex items-center justify-center font-display font-black text-[17px] border-2 border-white/20 opacity-40"
+                                    className="w-[52px] h-[52px] rounded-full mx-auto mb-2 flex items-center justify-center font-display font-black text-[17px] border-2 border-white/20 opacity-40 overflow-hidden"
                                     style={{ background: loser.gradient, color: loser.textColor }}
                                 >
-                                    {loser.initials}
+                                    {loser.photoURL ? <img src={loser.photoURL} alt="" className="w-full h-full object-cover" /> : loser.initials}
                                 </div>
                                 <div className="font-bold text-[13px] text-white/50">{loser.displayName.split(" ")[0]}</div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Top 3 */}
                     <div className="px-[18px] py-3.5 border-b border-white/[0.03]">
                         <div className="text-[8px] tracking-[4px] uppercase text-ace-muted font-display font-bold mb-3">
                             Top 3 Atualizado
                         </div>
-                        {MOCK_LEADERBOARD.slice(0, 3).map((entry, i) => (
+                        {top3.map((entry, i) => (
                             <div key={entry.userId} className="flex items-center gap-2.5 mb-2">
-                                <div className={`font-display font-black text-sm w-[18px] ${i === 0 ? "text-[#FFD700]" : i === 1 ? "text-[#C0C0C0]" : "text-[#CD7F32]"
-                                    }`}>
+                                <div className={`font-display font-black text-sm w-[18px] ${i === 0 ? "text-[#FFD700]" : i === 1 ? "text-[#C0C0C0]" : "text-[#CD7F32]"}`}>
                                     {i + 1}
                                 </div>
                                 <div
-                                    className="w-[26px] h-[26px] rounded-full flex items-center justify-center font-black text-[9px]"
-                                    style={{ background: entry.player.gradient, color: entry.player.textColor }}
+                                    className="w-[26px] h-[26px] rounded-full flex items-center justify-center font-black text-[9px] overflow-hidden"
+                                    style={{ background: entry.gradient, color: entry.textColor }}
                                 >
-                                    {entry.player.initials}
+                                    {entry.photoURL ? <img src={entry.photoURL} alt="" className="w-full h-full object-cover" /> : entry.initials}
                                 </div>
-                                <div className={`flex-1 text-[13px] font-semibold ${entry.userId === CURRENT_USER.id ? "text-neon" : i === 2 ? "text-white/50" : "text-white"
-                                    }`}>
-                                    {entry.player.displayName.split(" ")[0]} {entry.userId === CURRENT_USER.id && "←"}
+                                <div className={`flex-1 text-[13px] font-semibold ${entry.userId === user?.uid ? "text-neon" : i === 2 ? "text-white/50" : "text-white"}`}>
+                                    {entry.displayName.split(" ")[0]} {entry.userId === user?.uid && "←"}
                                 </div>
                                 <div className="font-display text-xs font-black text-neon">{entry.points}</div>
                             </div>
                         ))}
+                        {user && !isPlayerInTop3 && (
+                            <div className="flex items-center gap-2.5 mt-3 pt-2 border-t border-white/[0.05]">
+                                <div className="font-display font-black text-xs w-[18px] text-ace-muted">→</div>
+                                <div className="flex-1 text-[11px] font-semibold text-ace-muted">
+                                    Seu lugar te espera. Bora jogar!
+                                </div>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Badges */}
-                    <div className="grid grid-cols-2 gap-2 px-[18px] py-3.5 border-b border-white/[0.03]">
-                        <div className="rounded-xl p-3 text-center bg-[#FFD700]/5 border border-[#FFD700]/15">
-                            <span className="text-2xl block mb-1">🏆</span>
-                            <div className="text-[8px] font-extrabold tracking-[1.5px] uppercase font-display text-[#FFD700]">Campeão</div>
-                            <div className="text-[11px] font-bold mt-[3px] text-white">Rafael M.</div>
-                        </div>
-                        <div className="rounded-xl p-3 text-center bg-[#EF4444]/5 border border-[#EF4444]/[0.12]">
-                            <span className="text-2xl block mb-1">🏮</span>
-                            <div className="text-[8px] font-extrabold tracking-[1.5px] uppercase font-display text-[#EF4444]">Lanterna</div>
-                            <div className="text-[11px] font-bold mt-[3px] text-white">João P.</div>
-                        </div>
-                    </div>
-
-                    {/* Invite Code */}
-                    <div className="px-[18px] py-3.5 text-center">
+                    <div className="px-[18px] py-4 text-center">
                         <span className="font-display font-black text-[22px] tracking-[6px] text-neon block">
-                            {MOCK_GROUP.inviteCode}
+                            {group?.inviteCode || "ACE"}
                         </span>
                         <span className="text-[9px] tracking-[4px] text-ace-muted uppercase mt-[3px] font-display block">
-                            entre no grupo · ace app
+                            entre no grupo usando o código
                         </span>
                     </div>
                 </div>
 
-                {/* Compact Image Preview */}
                 {imageUrl && (
                     <div className="mx-4 mb-3 bg-ace-surface border border-neon/10 rounded-xl p-2.5 flex items-center gap-3 animate-slide-up">
                         <img src={imageUrl} alt="Share card preview" className="w-[72px] h-[72px] rounded-lg border border-white/[0.06] object-cover object-top shrink-0" />
@@ -268,16 +291,12 @@ function ShareContent() {
                     </div>
                 )}
 
-                {/* Status */}
                 {isGenerating && (
                     <div className="mx-4 mb-3 text-center text-[11px] text-neon font-display font-bold tracking-[2px] uppercase animate-pulse">
                         ⏳ Gerando imagem...
                     </div>
                 )}
 
-                {/* ═══ SHARE BUTTONS — TWO-STEP FLOW ═══ */}
-
-                {/* Step 1: Send Image */}
                 {!imageSent ? (
                     <button
                         onClick={handleShareImage}
@@ -292,12 +311,9 @@ function ShareContent() {
                     </button>
                 ) : (
                     <>
-                        {/* Step 1 done indicator */}
                         <div className="mx-4 mb-2 bg-[#25D366]/10 border border-[#25D366]/20 rounded-xl py-2.5 flex items-center justify-center gap-2 font-display font-bold text-[11px] tracking-[1.5px] uppercase text-[#25D366]">
                             ✅ Imagem enviada!
                         </div>
-
-                        {/* Step 2: Send Link Text */}
                         <button
                             onClick={handleSendLink}
                             className="mx-4 mb-2.5 h-[58px] bg-[#25D366] rounded-[14px] flex items-center justify-center gap-2.5 font-display font-black text-[12px] tracking-[2px] uppercase text-white cursor-pointer transition-all duration-200 shadow-[0_4px_20px_rgba(37,211,102,0.2)] active:scale-[0.97] w-[calc(100%-32px)] relative overflow-hidden animate-slide-up"
@@ -311,7 +327,6 @@ function ShareContent() {
                     </>
                 )}
 
-                {/* Download image */}
                 <button
                     onClick={handleDownloadImage}
                     disabled={isGenerating}
@@ -330,13 +345,10 @@ function ShareContent() {
                 </div>
             </div>
 
-            {/* Toast */}
-            <div className={`fixed left-1/2 -translate-x-1/2 w-[calc(100%-32px)] max-w-[400px] bg-neon text-background font-display font-black text-xs tracking-[2.5px] text-center uppercase py-[18px] px-5 z-[1100] transition-[top] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] rounded-2xl shadow-[0_8px_32px_rgba(204,255,0,0.3)] ${showToast ? "top-14" : "-top-20"
-                }`}>
-                🏆 RESULTADO SALVO! RANKING ATUALIZADO!
+            <div className={`fixed left-1/2 -translate-x-1/2 w-[calc(100%-32px)] max-w-[400px] bg-neon text-background font-display font-black text-xs tracking-[2.5px] text-center uppercase py-[18px] px-5 z-[1100] transition-[top] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] rounded-2xl shadow-[0_8px_32px_rgba(204,255,0,0.3)] ${showToast ? "top-14" : "-top-20"}`}>
+                🏆 RESULTADO COMPARTILHÁVEL PRONTO!
             </div>
 
-            {/* Confetti */}
             <div className="fixed inset-0 pointer-events-none z-[998] overflow-hidden">
                 {confetti.map((c) => (
                     <div
@@ -360,7 +372,7 @@ function ShareContent() {
 
 export default function SharePage() {
     return (
-        <Suspense fallback={<div className="h-full flex items-center justify-center text-ace-muted">Carregando...</div>}>
+        <Suspense fallback={<div className="h-full flex items-center justify-center text-ace-muted"><div className="w-6 h-6 border-2 border-[#CCFF00]/30 border-t-[#CCFF00] rounded-full animate-spin" /></div>}>
             <ShareContent />
         </Suspense>
     );

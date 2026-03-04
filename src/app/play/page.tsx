@@ -3,19 +3,32 @@
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { getUserGroups, type Group } from "@/lib/firestore-service";
+
+const FEATURED_DRILLS = [
+    { id: "sniper-do-saque", icon: "⚡", title: "O Sniper do Saque", desc: "Saque preciso + ataque mortal", difficulty: 3 },
+    { id: "rei-do-winner", icon: "👑", title: "Rei do Winner", desc: "Winner limpo vale x3. Saia da zona de conforto.", difficulty: 4 },
+    { id: "tie-break-da-morte", icon: "💀", title: "Tie-Break da Morte", desc: "Começa no 4×4. Pressão total", difficulty: 5 },
+    { id: "guerra-de-trincheira", icon: "⚔️", title: "Guerra de Trincheira", desc: "Só slice e deixadinha", difficulty: 3 },
+];
 
 export default function PlayPage() {
     const { user, loading } = useAuth();
     const router = useRouter();
-    const [isScheduling, setIsScheduling] = useState(false);
+    const [groups, setGroups] = useState<Group[]>([]);
 
     useEffect(() => {
         if (!loading && !user) {
             router.push("/");
         }
+        if (user) {
+            getUserGroups(user.uid).then(setGroups).catch(console.error);
+        }
     }, [user, loading, router]);
 
     if (loading || !user) return <div className="min-h-screen bg-black flex items-center justify-center text-white">Carregando...</div>;
+
+    const groupId = groups.length > 0 ? groups[0].id : null;
 
     return (
         <div className="flex flex-col h-full bg-black text-white relative overflow-hidden overflow-y-auto pb-24">
@@ -42,9 +55,9 @@ export default function PlayPage() {
 
             <div className="px-5 flex flex-col gap-3 relative z-10">
 
-                {/* Agendar Jogo (Toggle) */}
+                {/* Agendar Jogo */}
                 <div
-                    onClick={() => setIsScheduling(!isScheduling)}
+                    onClick={() => router.push('/schedule')}
                     className="bg-[#111113] border border-[#27272A] rounded-2xl p-4 flex items-center gap-4 cursor-pointer active:scale-[0.98] transition-all"
                 >
                     <div className="w-12 h-12 bg-[#18181B] border border-[#27272A] rounded-xl flex items-center justify-center text-2xl shrink-0">
@@ -54,23 +67,20 @@ export default function PlayPage() {
                         <div className="font-montserrat font-black text-[15px] uppercase tracking-wide">Agendar Jogo</div>
                         <div className="text-[11px] text-[#A1A1AA] mt-1">Marque data/hora e avise pelo WhatsApp</div>
                     </div>
-                    <div className={`text-[#52525B] transition-transform ${isScheduling ? 'rotate-180' : ''}`}>
-                        ▼
-                    </div>
+                    <div className="text-[#CCFF00] font-black text-xl">→</div>
                 </div>
-
-                {isScheduling && (
-                    <div className="bg-[#111113] border border-[#27272A] rounded-2xl p-4 animate-[fadeIn_0.3s_ease-out]">
-                        <div className="text-[10px] text-[#A1A1AA] font-bold tracking-[2px] uppercase mb-3">📅 Escolha o dia</div>
-                        <p className="text-sm text-[#52525B] italic text-center py-4">Agendamento em desenvolvimento para V2.</p>
-                    </div>
-                )}
 
                 <div className="text-[10px] font-extrabold tracking-[4px] uppercase text-[#A1A1AA] mt-6 mb-2">Jogo Principal</div>
 
                 {/* Set Normal - Navigate to Log Match */}
                 <div
-                    onClick={() => router.push("/play/log")}
+                    onClick={() => {
+                        if (groupId) {
+                            router.push(`/log/${groupId}/set-normal?duration=60`);
+                        } else {
+                            router.push("/groups");
+                        }
+                    }}
                     className="bg-[#111113] border border-[rgba(204,255,0,0.3)] rounded-2xl p-4 flex items-center gap-4 cursor-pointer active:scale-[0.98] transition-transform relative overflow-hidden"
                 >
                     <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00] opacity-[0.03] rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none" />
@@ -91,27 +101,42 @@ export default function PlayPage() {
                 </div>
 
                 <div className="text-center text-[9px] text-[#52525B] font-bold tracking-[2px] uppercase my-6">Ou tente algo diferente</div>
-                <div className="text-[10px] font-extrabold tracking-[4px] uppercase text-[#A1A1AA] mb-2">🎯 Drills Situacionais</div>
 
-                {/* Situational Drills (MVP Placeholders) */}
-                {[
-                    { id: "1", icon: "⚡", title: "O Sniper do Saque", desc: "Saque preciso + ataque mortal" },
-                    { id: "2", icon: "👑", title: "Rei do Winner", desc: "Winner limpo vale x3" },
-                    { id: "3", icon: "💀", title: "Tie-Break da Morte", desc: "Começa no 4×4. Pressão total" },
-                    { id: "4", icon: "⚔️", title: "Guerra de Trincheira", desc: "Só slice e deixadinha" }
-                ].map((drill) => (
+                <div className="flex items-center justify-between mb-2">
+                    <div className="text-[10px] font-extrabold tracking-[4px] uppercase text-[#A1A1AA]">🎯 Drills Situacionais</div>
+                    <div className="text-[9px] font-bold text-[#52525B] bg-[#18181B] border border-[#27272A] px-2 py-1 rounded-lg">
+                        🎮 Só por diversão
+                    </div>
+                </div>
+
+                {/* Situational Drills - Real drill IDs */}
+                {FEATURED_DRILLS.map((drill) => (
                     <div
                         key={drill.id}
-                        onClick={() => router.push(`/play/log-drill?drill=${drill.id}`)}
-                        className="bg-[#111113] border border-[#27272A] rounded-2xl p-4 flex items-center gap-4 transition-all cursor-pointer active:scale-[0.98] hover:border-[rgba(204,255,0,0.3)]"
+                        onClick={() => {
+                            if (groupId) {
+                                router.push(`/drill/${groupId}/${drill.id}`);
+                            } else {
+                                router.push("/groups");
+                            }
+                        }}
+                        className="bg-[#111113] border border-[#27272A] rounded-2xl p-4 flex items-center gap-4 transition-all cursor-pointer active:scale-[0.98] hover:border-[rgba(204,255,0,0.3)] group"
                     >
-                        <div className="w-12 h-12 bg-[#18181B] border border-[#27272A] rounded-xl flex items-center justify-center text-2xl shrink-0">
+                        <div className="w-14 h-14 bg-gradient-to-br from-[#18181B] to-[#0f0f11] border border-[#27272A] rounded-xl flex items-center justify-center text-2xl shrink-0 group-hover:border-[rgba(204,255,0,0.2)] transition-colors">
                             {drill.icon}
                         </div>
                         <div className="flex-1">
                             <div className="font-montserrat font-black text-[14px] uppercase tracking-wide">{drill.title}</div>
                             <div className="text-[11px] text-[#A1A1AA] mt-1">{drill.desc}</div>
+                            <div className="flex items-center gap-2 mt-2">
+                                <span className="text-[#CCFF00] text-[9px]">
+                                    {"★".repeat(drill.difficulty)}{"☆".repeat(5 - drill.difficulty)}
+                                </span>
+                                <span className="text-[9px] font-bold text-[#52525B]">·</span>
+                                <span className="text-[9px] font-bold text-[#52525B]">Pontos corridos até 10</span>
+                            </div>
                         </div>
+                        <div className="text-[#52525B] group-hover:text-[#CCFF00] transition-colors font-black text-lg">→</div>
                     </div>
                 ))}
             </div>

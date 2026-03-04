@@ -32,6 +32,7 @@ function LogContent() {
     const [mvpId, setMvpId] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
     const [loadingMembers, setLoadingMembers] = useState(true);
+    const [myRankBefore, setMyRankBefore] = useState<number | null>(null);
 
     useEffect(() => {
         if (user) loadMembers();
@@ -58,6 +59,12 @@ function LogContent() {
             const lb = await getGroupLeaderboard(targetGroupId);
             // Filter out current user
             setMembers(lb.filter(m => m.userId !== user!.uid));
+
+            // Find current user's rank
+            const myIdx = lb.findIndex(m => m.userId === user!.uid);
+            if (myIdx >= 0) {
+                setMyRankBefore(myIdx + 1);
+            }
         } catch (err) {
             console.error("[ACE] Failed to load members:", err);
         } finally {
@@ -104,7 +111,8 @@ function LogContent() {
             });
 
             console.log("[ACE] Match recorded successfully!");
-            router.push(`/share/${group.id}/${drill!.id}?score=${selectedScore}&winner=${winnerId}&rival=${selectedRival}&duration=${duration}`);
+            const ptsAwarded = winnerId === user.uid ? winnerPts.total : loserPts.total;
+            router.push(`/celebration?groupId=${group.id}&drillId=${drill!.id}&score=${selectedScore}&winner=${winnerId}&rival=${selectedRival}&duration=${duration}&points=${ptsAwarded}&rankBefore=${myRankBefore || '-'}`);
         } catch (err: any) {
             console.error("[ACE] Failed to record match:", err);
             alert(`Erro ao salvar resultado: ${err.message}`);

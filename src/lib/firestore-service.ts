@@ -71,6 +71,19 @@ export interface MatchRecord {
     createdAt: any;
 }
 
+export interface ScheduledMatch {
+    id: string;
+    groupId: string;
+    challengerId: string;
+    challengerName: string;
+    rivalId: string;
+    rivalName: string;
+    date: string; // ISO string or simple YYYY-MM-DDTHH:mm
+    location: string;
+    status: "pending" | "accepted" | "declined" | "completed";
+    createdAt: any;
+}
+
 export interface LeaderboardEntry {
     odoc_id: string;
     odoc_userId: string;
@@ -527,3 +540,41 @@ export function subscribeToLeaderboard(
         callback(entries);
     });
 }
+
+// ═══ SCHEDULED MATCHES ═══
+
+export async function createScheduledMatch(
+    groupId: string,
+    matchData: Omit<ScheduledMatch, "id" | "createdAt" | "status">
+): Promise<ScheduledMatch> {
+    const data = {
+        ...matchData,
+        groupId,
+        status: "pending",
+        createdAt: serverTimestamp(),
+    };
+
+    const matchRef = await addDoc(collection(db, "groups", groupId, "scheduledMatches"), data);
+
+    return { id: matchRef.id, ...data, createdAt: Timestamp.now() } as ScheduledMatch;
+}
+
+export async function getScheduledMatch(
+    groupId: string,
+    matchId: string
+): Promise<ScheduledMatch | null> {
+    const matchRef = doc(db, "groups", groupId, "scheduledMatches", matchId);
+    const snap = await getDoc(matchRef);
+    if (!snap.exists()) return null;
+    return { id: snap.id, ...snap.data() } as ScheduledMatch;
+}
+
+export async function updateScheduledMatchStatus(
+    groupId: string,
+    matchId: string,
+    status: ScheduledMatch["status"]
+): Promise<void> {
+    const matchRef = doc(db, "groups", groupId, "scheduledMatches", matchId);
+    await updateDoc(matchRef, { status });
+}
+

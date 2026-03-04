@@ -141,6 +141,23 @@ export default function HomePage() {
                 </div>
             </div>
 
+            {/* Schedule Match CTA */}
+            <div
+                onClick={() => router.push('/schedule')}
+                className="px-5 mt-4 z-10 w-full relative cursor-pointer active:scale-95 transition-transform"
+            >
+                <div className="bg-ace-surface border border-ace-border rounded-2xl p-4 flex items-center justify-between shadow-sm transition-colors hover:bg-white/[0.02]">
+                    <div className="flex items-center gap-3">
+                        <div className="text-2xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">📅</div>
+                        <div>
+                            <div className="font-display font-black text-sm uppercase text-foreground tracking-wide">Marcar Jogo</div>
+                            <div className="text-[10px] text-ace-mid font-medium">Desafie seus amigos via WhatsApp</div>
+                        </div>
+                    </div>
+                    <div className="font-display font-black text-lg text-neon">→</div>
+                </div>
+            </div>
+
             <div className="mt-8 px-5 z-10 text-center pb-12">
                 <button onClick={handleLogout} className="text-[#EF4444] text-xs font-bold font-montserrat tracking-widest uppercase underline p-4">Sair do App</button>
             </div>
